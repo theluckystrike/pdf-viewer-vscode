@@ -5,6 +5,9 @@ const { buildHtml } = require('./html');
 const { parseWebviewMessage, readConfig } = require('./protocol');
 const { StateStore } = require('./stateStore');
 const { watchGlob, isSameFile } = require('./watch');
+const { createRatingPrompt } = require('./rate');
+
+let rating = { success() {} };
 
 const VIEW_TYPE = 'pdfViewer.preview';
 const CONFIG = 'pdfViewer';
@@ -111,6 +114,7 @@ class PdfEditorProvider {
         entry.lastError = m.message;
       } else if (m.type === 'info') {
         entry.pages = m.pages;
+        if (!entry.counted) { entry.counted = true; rating.success(); }
       } else if (m.type === 'rendered') {
         entry.firstRender = { page: m.page, dark: m.dark };
       } else if (m.type === 'loadAnyway') {
@@ -162,6 +166,7 @@ class PdfEditorProvider {
 }
 
 function activate(context) {
+  rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pdf-viewer-dark', section: 'pdfViewer', message: (n) => `PDF Viewer has opened ${n} files for you. A rating helps other people find it.` });
   const provider = new PdfEditorProvider(context);
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {

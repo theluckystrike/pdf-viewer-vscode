@@ -70,6 +70,7 @@ Each PDF reopens at the page and zoom where you left it. When the file changes o
 | `pdfViewer.defaultZoom` | `page-width` | Zoom for a PDF you open for the first time |
 | `pdfViewer.rememberLastPage` | `true` | Reopen each PDF at the last page and zoom (up to 500 files) |
 | `pdfViewer.maxFileSizeMB` | `200` | Ask before opening larger PDFs |
+| `pdfViewer.askForRating` | `true` | Ask one time for a Marketplace rating, after 5 files and 2 days. Turn it off with `false` |
 
 ## Privacy and security
 

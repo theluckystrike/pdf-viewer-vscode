@@ -15,4 +15,5 @@ images/light-vs-dark.png
 images/screenshot-dark.png
 images/screenshot-light.png
 .github/**
-images/**
+images/vscode-*
+images/demo-*

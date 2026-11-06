@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (2026-11-06)
+
+- Shorter names in menus and the editor picker: "PDF Reader".
+
 ## 0.1.0 (2026-11-06)
 
 First release. A read-only PDF editor built on pdf.js 5.7.284 (legacy build, bundled, no CDN).

@@ -1,8 +1,8 @@
 {
   "name": "pdf-viewer-dark",
-  "displayName": "PDF Viewer & Reader with Dark Mode",
+  "displayName": "PDF Viewer & PDF Reader with Dark Mode",
   "description": "PDF viewer and PDF reader for VS Code with a real dark mode that keeps photos in their true colors, plus search, an outline, thumbnails and zoom, all offline.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -19,9 +19,9 @@
     "Other"
   ],
   "keywords": [
-    "pdf",
-    "pdf viewer",
     "pdf reader",
+    "pdf viewer",
+    "pdf",
     "pdf dark mode",
     "view pdf",
     "pdf preview",

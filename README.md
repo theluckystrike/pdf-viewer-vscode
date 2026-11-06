@@ -1,9 +1,9 @@
-# PDF Viewer & Reader with Dark Mode
+# PDF Viewer & PDF Reader with Dark Mode
 
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pdf-viewer-dark?label=VS%20Code%20installs" alt="VS Code installs"></a>
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pdf-viewer-dark?label=version" alt="Version"></a>
 
-For developers who read specs and papers next to their code, PDF Reader shows PDFs in VS Code with dark pages that keep photos and charts in their real colors.
+For developers who read specs and papers next to their code, this PDF viewer and PDF reader shows PDFs in VS Code with dark pages that keep photos and charts in their real colors.
 
 ![A 3 page earthquake report open in VS Code with dark pages. The outline is open on the left, the search box has Japan with 1 of 4 matches, and the map keeps its original colors](https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-pdf-dark.png)
 

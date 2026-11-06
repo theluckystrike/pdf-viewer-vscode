@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 (2026-11-07)
+
+- The Marketplace name is now "PDF Viewer & PDF Reader with Dark Mode", so a search for PDF reader finds it. The extension ID, settings and commands stay the same.
+
 ## 0.2.0 (2026-11-06)
 
 - Markdown links can open a PDF at a page, as in a browser. `[paper](docs/paper.pdf#page=12)` in a `.md` file opens page 12 when you click it in the Markdown preview. `#nameddest=results` opens a named destination and `&zoom=150` sets the zoom. The link sets the page only when the PDF opens. After that, the last page you read is remembered per file as before.

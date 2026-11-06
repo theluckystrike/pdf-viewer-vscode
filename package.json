@@ -2,7 +2,7 @@
   "name": "pdf-viewer-dark",
   "displayName": "PDF Reader: Dark Mode, Search, Outline",
   "description": "Read PDFs in VS Code with a real dark mode that keeps photos in their true colors, plus search with highlights, outline, page thumbnails and zoom. Works offline.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -62,7 +62,7 @@
     "customEditors": [
       {
         "viewType": "pdfViewer.preview",
-        "displayName": "PDF Reader: Dark Mode, Search, Outline",
+        "displayName": "PDF Reader",
         "selector": [
           {
             "filenamePattern": "*.pdf"
@@ -115,7 +115,7 @@
       },
       {
         "command": "pdfViewer.openWith",
-        "title": "Open with PDF Reader: Dark Mode, Search, Outline",
+        "title": "Open with PDF Reader",
         "category": "PDF"
       }
     ],
@@ -166,7 +166,7 @@
       ]
     },
     "configuration": {
-      "title": "PDF Reader: Dark Mode, Search, Outline",
+      "title": "PDF Reader",
       "properties": {
         "pdfViewer.darkMode": {
           "type": "string",
@@ -217,7 +217,7 @@
     "walkthroughs": [
       {
         "id": "pdfViewer.start",
-        "title": "Get started with PDF Reader: Dark Mode, Search, Outline",
+        "title": "Get started with PDF Reader",
         "description": "Open a PDF, read it in dark mode, search it and jump through its outline.",
         "steps": [
           {

@@ -1,0 +1,300 @@
+{
+  "name": "pdf-viewer-dark",
+  "displayName": "PDF Viewer with Dark Mode",
+  "description": "Read PDFs in VS Code with a real dark mode that keeps photos in their true colors, plus search with highlights, outline, page thumbnails and zoom. Works offline.",
+  "version": "0.1.0",
+  "publisher": "zovo",
+  "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1B1F2A",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.90.0",
+    "node": ">=18"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "pdf",
+    "pdf viewer",
+    "pdf preview",
+    "pdf reader",
+    "view pdf",
+    "open pdf",
+    "dark mode",
+    "dark pdf",
+    "night mode",
+    "dark theme",
+    "invert",
+    "pdf search",
+    "find in pdf",
+    "outline",
+    "bookmarks",
+    "table of contents",
+    "thumbnails",
+    "zoom",
+    "pdf.js",
+    "pdfjs",
+    "document",
+    "viewer",
+    "preview",
+    "reader",
+    "paper",
+    "latex",
+    "arxiv",
+    "datasheet",
+    "offline",
+    "custom editor"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "pdfViewer.preview",
+        "displayName": "PDF Viewer with Dark Mode",
+        "selector": [
+          {
+            "filenamePattern": "*.pdf"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "pdfViewer.toggleDarkMode",
+        "title": "Toggle Dark Pages",
+        "category": "PDF",
+        "icon": "$(color-mode)"
+      },
+      {
+        "command": "pdfViewer.find",
+        "title": "Find in PDF",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.zoomIn",
+        "title": "Zoom In",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.zoomOut",
+        "title": "Zoom Out",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.fitWidth",
+        "title": "Fit Width",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.fitPage",
+        "title": "Fit Page",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.toggleSidebar",
+        "title": "Toggle Outline and Pages",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.forgetPositions",
+        "title": "Forget Last Page of All PDFs",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.openWith",
+        "title": "Open with PDF Viewer with Dark Mode",
+        "category": "PDF"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "pdfViewer.toggleDarkMode",
+          "when": "activeCustomEditorId == pdfViewer.preview",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "pdfViewer.openWith",
+          "when": "resourceExtname == .pdf",
+          "group": "navigation@99"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "pdfViewer.toggleDarkMode",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.find",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.zoomIn",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.zoomOut",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.fitWidth",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.fitPage",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.toggleSidebar",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PDF Viewer with Dark Mode",
+      "properties": {
+        "pdfViewer.darkMode": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "on",
+            "off"
+          ],
+          "enumDescriptions": [
+            "Dark pages when the VS Code theme is dark or high contrast dark.",
+            "Always dark pages.",
+            "Never dark pages. Show the PDF as printed."
+          ],
+          "default": "auto",
+          "description": "When to show PDF pages dark. The moon button in the toolbar switches it for the open file."
+        },
+        "pdfViewer.keepImagesInDarkMode": {
+          "type": "boolean",
+          "default": true,
+          "description": "In dark mode, keep photos and other raster images in their original colors. Text, lines and backgrounds are still darkened."
+        },
+        "pdfViewer.defaultZoom": {
+          "type": "string",
+          "enum": [
+            "page-width",
+            "page-fit"
+          ],
+          "enumDescriptions": [
+            "Fit the page width to the editor.",
+            "Fit the whole page in the editor."
+          ],
+          "default": "page-width",
+          "description": "Zoom for a PDF that you open for the first time."
+        },
+        "pdfViewer.rememberLastPage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Reopen each PDF at the page and zoom where you left it. Stored locally in VS Code, for up to 500 files."
+        },
+        "pdfViewer.maxFileSizeMB": {
+          "type": "number",
+          "default": 200,
+          "minimum": 1,
+          "description": "Ask before opening PDFs larger than this, in MB."
+        }
+      }
+    },
+    "walkthroughs": [
+      {
+        "id": "pdfViewer.start",
+        "title": "Get started with PDF Viewer with Dark Mode",
+        "description": "Open a PDF, read it in dark mode, search it and jump through its outline.",
+        "steps": [
+          {
+            "id": "open",
+            "title": "Open a PDF",
+            "description": "Click any .pdf file in the Explorer. It opens in this viewer.\n[Open a PDF file](command:pdfViewer.openWith)",
+            "media": {
+              "image": "images/screenshot-light.png",
+              "altText": "A PDF open in the viewer with a light theme."
+            },
+            "completionEvents": [
+              "onCommand:pdfViewer.openWith"
+            ]
+          },
+          {
+            "id": "dark",
+            "title": "Switch dark pages on or off",
+            "description": "Pages follow your theme. The moon button in the PDF toolbar switches dark pages for this file. Photos keep their colors.\n[Toggle dark pages](command:pdfViewer.toggleDarkMode)",
+            "media": {
+              "image": "images/screenshot-dark.png",
+              "altText": "Dark pages with a photo in its original colors."
+            },
+            "completionEvents": [
+              "onCommand:pdfViewer.toggleDarkMode"
+            ]
+          },
+          {
+            "id": "find",
+            "title": "Search and jump",
+            "description": "Press Ctrl+F (Cmd+F on macOS) in the PDF, type, then Enter for the next match. Open the sidebar for the outline and page thumbnails.\n[Open settings](command:workbench.action.openSettings?%5B%22pdfViewer%22%5D)",
+            "media": {
+              "markdown": "walkthrough/keys.md"
+            },
+            "completionEvents": [
+              "onCommand:workbench.action.openSettings"
+            ]
+          }
+        ]
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pdfViewer.find",
+        "key": "ctrl+f",
+        "mac": "cmd+f",
+        "when": "activeCustomEditorId == pdfViewer.preview && !sideBarFocus && !panelFocus && !auxiliaryBarFocus && !inQuickOpen"
+      },
+      {
+        "command": "pdfViewer.zoomIn",
+        "key": "ctrl+=",
+        "mac": "cmd+=",
+        "when": "activeCustomEditorId == pdfViewer.preview && !sideBarFocus && !panelFocus && !auxiliaryBarFocus && !inQuickOpen"
+      },
+      {
+        "command": "pdfViewer.zoomOut",
+        "key": "ctrl+-",
+        "mac": "cmd+-",
+        "when": "activeCustomEditorId == pdfViewer.preview && !sideBarFocus && !panelFocus && !auxiliaryBarFocus && !inQuickOpen"
+      }
+    ]
+  },
+  "scripts": {
+    "postinstall": "node scripts/copy-pdfjs.js",
+    "test": "node --test test/*.test.js",
+    "test:browser": "python3 test/e2e/run.py",
+    "package": "npx -y @vscode/vsce@3 package --no-dependencies -o dist/",
+    "test:vscode": "node test/vscode/run.js"
+  },
+  "devDependencies": {
+    "pdfjs-dist": "5.7.284"
+  },
+  "homepage": "https://github.com/theluckystrike/pdf-viewer-vscode#readme",
+  "bugs": {
+    "url": "https://github.com/theluckystrike/pdf-viewer-vscode/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theluckystrike/pdf-viewer-vscode.git"
+  }
+}

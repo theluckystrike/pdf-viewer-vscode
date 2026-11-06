@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="24" fill="#1B1F2A"/>
+  <!-- light page behind -->
+  <path d="M30 18h40l18 18v62a6 6 0 0 1-6 6H30a6 6 0 0 1-6-6V24a6 6 0 0 1 6-6z" fill="#F1F5F9"/>
+  <path d="M70 18v12a6 6 0 0 0 6 6h12z" fill="#CBD5E1"/>
+  <!-- dark page in front -->
+  <path d="M46 34h40l18 18v52a6 6 0 0 1-6 6H46a6 6 0 0 1-6-6V40a6 6 0 0 1 6-6z" fill="#2B3142" stroke="#1B1F2A" stroke-width="3"/>
+  <rect x="50" y="58" width="38" height="5" rx="2.5" fill="#E2E8F0"/>
+  <rect x="50" y="68" width="30" height="5" rx="2.5" fill="#E2E8F0"/>
+  <!-- photo keeps its colors -->
+  <rect x="50" y="78" width="44" height="22" rx="2" fill="#4F9DE8"/>
+  <path d="M50 100l12-12 9 8 8-6 15 10z" fill="#2F6B3A"/>
+  <circle cx="86" cy="84" r="3.5" fill="#FFF3B0"/>
+  <!-- moon -->
+  <circle cx="98" cy="30" r="17" fill="#F59E0B"/>
+  <circle cx="105" cy="24" r="14" fill="#1B1F2A"/>
+  <text x="32" y="44" font-family="Helvetica, Arial, sans-serif" font-weight="700" font-size="13" fill="#DC2626">PDF</text>
+</svg>

@@ -1,0 +1,214 @@
+:root {
+  --gap: 12px;
+  --toolbar-h: 34px;
+  --page-dark-bg: #1f1f1f;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+  color: var(--vscode-foreground);
+  background: var(--vscode-editor-background);
+  display: flex;
+  flex-direction: column;
+}
+button, input, select {
+  font: inherit;
+  color: var(--vscode-input-foreground, inherit);
+}
+#toolbar {
+  height: var(--toolbar-h);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
+  border-bottom: 1px solid var(--vscode-editorGroup-border, rgba(128,128,128,.35));
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sep { width: 1px; height: 18px; background: var(--vscode-editorGroup-border, rgba(128,128,128,.35)); margin: 0 4px; }
+.spacer { flex: 1 1 auto; }
+.tb {
+  min-width: 26px;
+  height: 24px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--vscode-foreground);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+.tb:hover { background: var(--vscode-toolbar-hoverBackground, rgba(128,128,128,.2)); }
+.tb[aria-pressed="true"] {
+  background: var(--vscode-inputOption-activeBackground, rgba(0,122,204,.3));
+  border-color: var(--vscode-inputOption-activeBorder, transparent);
+}
+.tb svg { width: 16px; height: 16px; fill: currentColor; }
+#pageInput { width: 46px; text-align: right; }
+#pageInput, #searchInput, #zoomSelect {
+  height: 24px;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, transparent);
+  border-radius: 2px;
+  padding: 0 4px;
+}
+#zoomSelect { background: var(--vscode-dropdown-background); color: var(--vscode-dropdown-foreground); border-color: var(--vscode-dropdown-border, transparent); }
+#searchInput { width: 180px; }
+#searchInput.noResults { border-color: var(--vscode-inputValidation-errorBorder, #be1100); }
+#searchCount { min-width: 64px; opacity: .8; font-size: 12px; }
+#fileName { opacity: .7; overflow: hidden; text-overflow: ellipsis; max-width: 30%; }
+#status { opacity: .8; font-size: 12px; }
+#main { flex: 1 1 auto; display: flex; min-height: 0; }
+#sidebar {
+  width: 230px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--vscode-editorGroup-border, rgba(128,128,128,.35));
+  background: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  min-height: 0;
+}
+#sidebar[hidden] { display: none; }
+.tabs { display: flex; gap: 2px; padding: 4px; flex: 0 0 auto; }
+.tabs button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--vscode-foreground);
+  padding: 4px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  opacity: .75;
+}
+.tabs button[aria-selected="true"] { opacity: 1; border-bottom-color: var(--vscode-focusBorder, #007acc); }
+#outline, #thumbs { flex: 1 1 auto; overflow: auto; min-height: 0; padding: 4px 0; }
+#outline ul { list-style: none; margin: 0; padding: 0; }
+#outline li.collapsed > ul { display: none; }
+.outlineRow { display: flex; align-items: center; min-height: 22px; }
+.outlineRow:hover { background: var(--vscode-list-hoverBackground); }
+.outlineRow a {
+  color: var(--vscode-foreground);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  padding: 2px 6px 2px 0;
+}
+.twisty { width: 16px; border: 0; background: transparent; color: var(--vscode-foreground); cursor: pointer; padding: 0; flex: 0 0 auto; }
+.twisty.leaf { visibility: hidden; }
+.empty { opacity: .7; padding: 8px 12px; margin: 0; }
+#thumbs { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 0; }
+#thumbs[hidden] { display: none; }
+.thumb {
+  border: 2px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--vscode-foreground);
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+}
+.thumb.current { border-color: var(--vscode-focusBorder, #007acc); }
+.thumbImg { width: 110px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.35); }
+.pdf-dark .thumbImg { background: var(--page-dark-bg); }
+.thumbImg canvas { width: 110px; height: auto; display: block; }
+#viewer { flex: 1 1 auto; overflow: auto; position: relative; outline: none; min-width: 0; }
+#pages { display: flex; flex-direction: column; align-items: center; padding: var(--gap) 0; gap: var(--gap); min-width: min-content; }
+.page {
+  position: relative;
+  flex: 0 0 auto;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  margin: 0 var(--gap);
+}
+.pdf-dark .page { background: var(--page-dark-bg); }
+.pageLabel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #888; font-size: 20px; }
+.canvasWrap { position: absolute; inset: 0; overflow: hidden; }
+.canvasWrap canvas { display: block; }
+.linkLayer { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.pdfLink { position: absolute; pointer-events: auto; display: block; }
+.pdfLink:hover { background: rgba(255, 213, 0, .2); outline: 1px solid rgba(255, 213, 0, .6); }
+#message {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -30%);
+  max-width: 480px;
+  padding: 16px 20px;
+  background: var(--vscode-editorWidget-background);
+  border: 1px solid var(--vscode-editorWidget-border, rgba(128,128,128,.4));
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+  z-index: 10;
+}
+#message h2 { margin: 0 0 8px; font-size: 15px; }
+#message p { margin: 0 0 12px; }
+#message button {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: 0;
+  padding: 5px 12px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+#message input { height: 26px; margin-right: 6px; background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border, transparent); }
+
+/* pdf.js text layer (from pdfjs-dist web/pdf_viewer.css, Apache-2.0), trimmed */
+.textLayer {
+  position: absolute;
+  text-align: initial;
+  inset: 0;
+  overflow: clip;
+  opacity: 1;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  caret-color: CanvasText;
+  z-index: 2;
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+}
+.textLayer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+.textLayer > :not(.markedContent), .textLayer .markedContent span:not(.markedContent) {
+  z-index: 1;
+  --font-height: 0;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  --scale-x: 1;
+  --rotate: 0deg;
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+.textLayer .markedContent { display: contents; }
+.textLayer span.highlight {
+  position: static;
+  transform: none;
+  font-size: inherit;
+  margin: -1px;
+  padding: 1px;
+  border-radius: 3px;
+  background-color: rgba(255, 200, 0, .45);
+}
+.textLayer span.highlight.selected { background-color: rgba(255, 120, 0, .75); }
+.pdf-dark .textLayer span.highlight { background-color: rgba(255, 215, 0, .35); }
+.pdf-dark .textLayer span.highlight.selected { background-color: rgba(255, 140, 0, .6); }
+.textLayer ::selection { background: rgba(0, 0, 255, .25); }
+.pdf-dark .textLayer ::selection { background: rgba(120, 170, 255, .4); }
+.textLayer br::selection { background: transparent; }

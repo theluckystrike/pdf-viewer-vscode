@@ -1,0 +1,11 @@
+test/**
+scripts/**
+node_modules/**
+dist/**
+*.vsix
+icon.svg
+.gitignore
+.vscode/**
+**/*.map
+NOTES.md
+package-lock.json

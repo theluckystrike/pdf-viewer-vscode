@@ -1,0 +1,84 @@
+# PDF Viewer with Dark Mode
+
+Read PDFs inside VS Code with dark pages that keep photos and charts in their real colors, and find any word with highlights.
+
+<p><a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pdf-viewer-dark" alt="Version"></a> <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pdf-viewer-dark" alt="Installs"></a> <a href="https://open-vsx.org/extension/zovo/pdf-viewer-dark"><img src="https://img.shields.io/open-vsx/v/zovo/pdf-viewer-dark" alt="Open VSX"></a></p>
+
+<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/screenshot-dark.png" alt="A PDF in dark mode. The text is light on a dark page, the mountain photo keeps its blue sky, three matches for &quot;latency&quot; are highlighted, and the outline is open on the left." width="100%">
+
+*Real output. The extension's own webview code renders [`test/fixtures/sample.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/HEAD/test/fixtures/sample.pdf) with the bundled pdf.js, captured in headless Chromium by [`test/e2e/run.py`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/HEAD/test/e2e/run.py).*
+
+- Dark pages that are easy on the eyes at night. Text, lines and backgrounds go dark. Photos keep their colors.
+- Find in PDF highlights every match and jumps between them with Enter. The outline and page thumbnails sit in one sidebar.
+- It runs offline. pdf.js is bundled inside the extension, and it makes no network calls and sends no telemetry.
+
+## Quick start
+
+1. Install the extension.
+2. Click any `.pdf` file in the Explorer. Press `Ctrl+F` (`Cmd+F` on macOS) to search, and click the moon button to switch dark pages on or off.
+
+Run "Get Started with PDF Viewer with Dark Mode" from the Welcome page for a short tour.
+
+## Dark mode that leaves images alone
+
+Most dark PDF modes invert the whole page, so a photo of a blue sky turns orange. PDF Viewer with Dark Mode inverts the page, then paints the original pixels of each raster image back on top.
+
+<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/light-vs-dark.png" alt="The same page in the light theme on the left and in dark mode on the right. The photo is identical on both sides." width="640">
+
+By default the pages follow your VS Code theme. Dark and high contrast dark themes get dark pages, light themes get the page as printed. The moon button in the toolbar, or "PDF: Toggle Dark Pages" in the Command Palette, switches it for the open file. Set `pdfViewer.darkMode` to `on` or `off` to stop following the theme.
+
+Charts drawn as vector lines are inverted like text, because to the PDF they are lines, not pictures. A chart embedded as an image keeps its colors.
+
+## Search, outline and pages
+
+Type in "Find in PDF". Matches light up on every page as the search runs, and the counter shows "3 of 23". Press `Enter` for the next match and `Shift+Enter` for the previous one. "Aa" turns on match case.
+
+The sidebar has two tabs. Outline shows the PDF's bookmarks as a tree, and a click jumps to the exact spot. Pages shows a thumbnail of each page, with the current one marked.
+
+<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/screenshot-pages.png" alt="Pages tab with four thumbnails, page 2 selected, and the page shown at fit page zoom with a bar chart in its original colors." width="100%">
+
+## Zoom and position
+
+Pick Fit width, Fit page, or 50% to 400% from the toolbar. `Ctrl` plus the mouse wheel, `Ctrl+=` and `Ctrl+-` also zoom (`Cmd` on macOS). They zoom the PDF, not the VS Code window.
+
+Each PDF reopens at the page and zoom where you left it. When the file changes on disk, for example after a LaTeX build, the viewer reloads it and stays on the same page.
+
+<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/screenshot-light.png" alt="The sample PDF in a light VS Code theme, with pages shown as printed." width="100%">
+
+## Keys
+
+| Key | Action |
+| --- | --- |
+| `Ctrl+F` / `Cmd+F` | Find in PDF |
+| `Enter`, `Shift+Enter`, `F3` | Next or previous match |
+| `Esc` in the search box | Clear the search |
+| `←` `→` | Previous or next page |
+| `Home`, `End` | First or last page |
+| `Ctrl+=`, `Ctrl+-` | Zoom in, zoom out |
+
+## Settings
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `pdfViewer.darkMode` | `auto` | `auto` follows the theme, `on` always dark, `off` never dark |
+| `pdfViewer.keepImagesInDarkMode` | `true` | Keep raster images in their colors in dark mode |
+| `pdfViewer.defaultZoom` | `page-width` | Zoom for a PDF you open for the first time |
+| `pdfViewer.rememberLastPage` | `true` | Reopen each PDF at the last page and zoom (up to 500 files) |
+| `pdfViewer.maxFileSizeMB` | `200` | Ask before opening larger PDFs |
+
+## Privacy and security
+
+The extension reads the PDF with the VS Code file system API and hands the bytes to the viewer. It doesn't upload anything, and it has no telemetry. The viewer runs under a strict Content-Security-Policy that allows only the extension's own scripts. Titles, text and links from the PDF are always inserted as plain text. PDF JavaScript and forms scripting are not run.
+
+A link inside a PDF opens in your browser only when you click it, and only for `http`, `https` and `mailto` links.
+
+## Known limits
+
+- It is a viewer. It doesn't fill forms, add annotations or print.
+- Big files load fully into memory. Above 200 MB it asks first, and you can change the limit.
+- Pages render on demand, so a 1,000 page PDF opens at page 1 at once, but search reads every page and takes longer on very long files.
+- If another PDF extension is installed, VS Code may ask which one to use. Right-click a PDF and pick "Open With..." to switch.
+
+## Credits
+
+PDF rendering by [pdf.js](https://github.com/mozilla/pdf.js) from Mozilla (Apache-2.0), bundled in `media/pdfjs`. The extension itself is MIT licensed.

@@ -2,7 +2,7 @@
   "name": "pdf-viewer-dark",
   "displayName": "PDF Viewer & Reader with Dark Mode",
   "description": "PDF viewer and PDF reader for VS Code with a real dark mode that keeps photos in their true colors, plus search, an outline, thumbnails and zoom, all offline.",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -109,6 +109,16 @@
         "category": "PDF"
       },
       {
+        "command": "pdfViewer.goToPage",
+        "title": "Go to Page...",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.copyPageLink",
+        "title": "Copy Link to This Page",
+        "category": "PDF"
+      },
+      {
         "command": "pdfViewer.forgetPositions",
         "title": "Forget Last Page of All PDFs",
         "category": "PDF"
@@ -172,6 +182,14 @@
         {
           "command": "pdfViewer.toggleSidebar",
           "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.goToPage",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.copyPageLink",
+          "when": "activeCustomEditorId == pdfViewer.preview"
         }
       ]
     },
@@ -215,6 +233,21 @@
           "type": "boolean",
           "default": true,
           "description": "Reopen each PDF at the page and zoom where you left it. Stored locally in VS Code, for up to 500 files."
+        },
+        "pdfViewer.sidebar": {
+          "type": "string",
+          "enum": [
+            "closed",
+            "open",
+            "remember"
+          ],
+          "enumDescriptions": [
+            "Start with the sidebar closed. It never opens by itself, also not for PDFs with an outline.",
+            "Open the outline and pages sidebar for every PDF.",
+            "Open it or keep it closed the way you left it in the last PDF."
+          ],
+          "default": "closed",
+          "description": "Whether the outline and pages sidebar is open when you open a PDF."
         },
         "pdfViewer.maxFileSizeMB": {
           "type": "number",
@@ -295,6 +328,11 @@
         "command": "pdfViewer.zoomOut",
         "key": "ctrl+-",
         "mac": "cmd+-",
+        "when": "activeCustomEditorId == pdfViewer.preview && !sideBarFocus && !panelFocus && !auxiliaryBarFocus && !inQuickOpen"
+      },
+      {
+        "command": "pdfViewer.goToPage",
+        "key": "ctrl+g",
         "when": "activeCustomEditorId == pdfViewer.preview && !sideBarFocus && !panelFocus && !auxiliaryBarFocus && !inQuickOpen"
       }
     ]

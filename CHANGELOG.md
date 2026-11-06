@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2026-11-06)
+
+- Markdown links can open a PDF at a page, as in a browser. `[paper](docs/paper.pdf#page=12)` in a `.md` file opens page 12 when you click it in the Markdown preview. `#nameddest=results` opens a named destination and `&zoom=150` sets the zoom. The link sets the page only when the PDF opens. After that, the last page you read is remembered per file as before.
+- New command "PDF: Copy Link to This Page" copies a Markdown link to the page you are reading. Inside a workspace the link starts with `/` from the workspace folder, so it works from any note in it.
+- New command "PDF: Go to Page..." with `Ctrl+G`. It checks that the page exists before it jumps.
+- New setting `pdfViewer.sidebar`. `closed` (the default) keeps the outline and pages sidebar closed until you open it, also for LaTeX PDFs with bookmarks. `open` opens it for every PDF, and `remember` keeps the way you left it in the last PDF.
+- All of this is free, like the rest of the extension. Nothing is sent anywhere.
+
 ## 0.1.6 (2026-11-06)
 
 - The Marketplace page now starts with a screenshot of a real VS Code window with dark pages, the outline and a search, and a short GIF of opening a PDF, searching and switching dark pages. Both were made from generated sample files. The images load from the GitHub repo and are not packed into the extension, so the download size stays the same.
@@ -30,7 +38,7 @@
 
 ## 0.1.1 (2026-11-06)
 
-- Shorter names in menus and the editor picker: "PDF Reader".
+- Shorter names in menus and the editor picker. They now say "PDF Reader".
 
 ## 0.1.0 (2026-11-06)
 

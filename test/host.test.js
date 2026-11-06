@@ -30,7 +30,10 @@ test('protocol: rejects unknown, malformed and dangerous messages', () => {
 
 test('protocol: readConfig normalises settings', () => {
   const cfg = (o) => readConfig((k, d) => (k in o ? o[k] : d));
-  assert.deepEqual(cfg({}), { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width', rememberPage: true, maxFileSizeBytes: 200 * 1048576 });
+  assert.deepEqual(cfg({}), { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width', rememberPage: true, maxFileSizeBytes: 200 * 1048576, sidebar: 'closed' });
+  assert.equal(cfg({ sidebar: 'open' }).sidebar, 'open');
+  assert.equal(cfg({ sidebar: 'remember' }).sidebar, 'remember');
+  assert.equal(cfg({ sidebar: 'sometimes' }).sidebar, 'closed');
   assert.equal(cfg({ darkMode: 'weird' }).darkMode, 'auto');
   assert.equal(cfg({ darkMode: 'on' }).darkMode, 'on');
   assert.equal(cfg({ defaultZoom: 'page-fit' }).defaultZoom, 'page-fit');
@@ -97,12 +100,16 @@ function makeVscode(files, settings) {
   const opened = [];
   let provider = null;
   class Uri {
-    constructor(scheme, p) { this.scheme = scheme; this.path = p; this.fsPath = p; }
+    constructor(scheme, p, fragment) { this.scheme = scheme; this.path = p; this.fsPath = p; this.fragment = fragment || ''; }
     static file(p) { return new Uri('file', p); }
-    static parse(s) { const u = new URL(s); return Object.assign(new Uri(u.protocol.slice(0, -1), u.pathname), { raw: s }); }
+    static parse(s) { const u = new URL(s); return Object.assign(new Uri(u.protocol.slice(0, -1), u.pathname, u.hash.slice(1)), { raw: s }); }
     static joinPath(u, ...parts) { return new Uri(u.scheme, path.posix.join(u.path, ...parts)); }
-    toString() { return this.raw || this.scheme + '://' + this.path; }
+    with(c) { return new Uri(c.scheme ?? this.scheme, c.path ?? this.path, c.fragment ?? this.fragment); }
+    toString() { return this.raw || this.scheme + '://' + this.path + (this.fragment ? '#' + this.fragment : ''); }
   }
+  const inputs = [];
+  const inputBoxes = [];
+  const clipboard = { text: '' };
   const ev = () => { const ls = []; const f = (l) => { ls.push(l); return { dispose() {} }; }; f.fire = (x) => ls.forEach((l) => l(x)); return f; };
   const vscode = {
     Uri,
@@ -111,12 +118,14 @@ function makeVscode(files, settings) {
       registerCustomEditorProvider: (id, p, opts) => { provider = { id, p, opts }; return { dispose() {} }; },
       showInformationMessage: async () => undefined,
       showOpenDialog: async () => undefined,
+      showInputBox: async (o) => { inputBoxes.push(o); return inputs.shift(); },
     },
     commands: { registerCommand: (id, fn) => { commands.set(id, fn); return { dispose() {} }; }, executeCommand: async () => {} },
-    env: { openExternal: async (u) => { opened.push(u.toString()); return true; } },
+    env: { openExternal: async (u) => { opened.push(u.toString()); return true; }, clipboard: { writeText: async (t) => { clipboard.text = t; } } },
     workspace: {
       getConfiguration: () => ({ get: (k, d) => (k in settings ? settings[k] : d) }),
       onDidChangeConfiguration: ev(),
+      getWorkspaceFolder: (u) => (u.path.startsWith('/ws/') ? { uri: new Uri('file', '/ws') } : undefined),
       fs: {
         stat: async (u) => { if (!(u.path in files)) throw new Error('ENOENT ' + u.path); return { size: files[u.path].length }; },
         readFile: async (u) => { if (!(u.path in files)) throw new Error('ENOENT ' + u.path); return files[u.path]; },
@@ -128,7 +137,7 @@ function makeVscode(files, settings) {
       },
     },
   };
-  return { vscode, watchers, commands, opened, getProvider: () => provider };
+  return { vscode, watchers, commands, opened, inputs, inputBoxes, clipboard, getProvider: () => provider };
 }
 
 function loadExtension(fake) {
@@ -412,7 +421,8 @@ test('manifest and README: links point at the public repo, images use absolute r
     assert.ok(fs.existsSync(path.join(__dirname, '..', u.slice(raw.length))), 'file exists: ' + u);
   }
   // no relative links: vsce would rewrite them to a guessed URL, and test/ is not in the VSIX
-  const links = [...readme.matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]);
+  // Code spans are examples (such as a #page=12 link), not links, so they are left out.
+  const links = [...readme.replace(/`[^`]*`/g, '').matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]);
   for (const l of links) assert.match(l, /^(https:|mailto:|#)/, l);
 });
 
@@ -465,4 +475,171 @@ test('support: Sponsor opens GitHub Sponsors, More free viewers installs only th
   pickFn = async (items) => items.find((i) => i.product && !i.product.live);
   await fake.commands.get('pdfViewer.moreViewers')();
   assert.match(fake.opened[1], /^https:\/\/github\.com\/theluckystrike\//);
+});
+
+// ---------- UPD1: open at a page from a link, go to page, copy a link to the page ----------
+const { parsePdfFragment, markdownPageLink } = require('../src/protocol');
+
+test('links: parsePdfFragment reads page, nameddest and zoom like browsers do', () => {
+  assert.deepEqual(parsePdfFragment('page=4'), { page: 4 });
+  assert.deepEqual(parsePdfFragment('#page=12&zoom=150'), { page: 12, zoom: 1.5 });
+  assert.deepEqual(parsePdfFragment('zoom=200,10,20'), { zoom: 2 });
+  assert.deepEqual(parsePdfFragment('nameddest=results'), { dest: 'results' });
+  assert.deepEqual(parsePdfFragment('nameddest=section%202'), { dest: 'section 2' });
+  assert.deepEqual(parsePdfFragment('chapter.3'), { dest: 'chapter.3' }, 'a bare fragment is a named destination');
+  assert.deepEqual(parsePdfFragment('PAGE=2'), { page: 2 });
+  for (const bad of ['', '#', 'page=0', 'page=-1', 'page=1.5', 'page=abc', 'page=99999999', 'zoom=5', 'zoom=9000', 'foo=bar', 'x'.repeat(1001), null, 42, {}]) {
+    assert.equal(parsePdfFragment(bad), null, JSON.stringify(bad));
+  }
+  assert.equal(parsePdfFragment('%E0%A4%A').dest, '%E0%A4%A', 'broken percent escapes do not throw');
+});
+
+test('links: markdownPageLink builds a workspace-root link that VS Code Markdown can open', () => {
+  assert.equal(markdownPageLink({ fileName: 'paper.pdf', relPath: 'docs/paper.pdf', page: 4 }), '[paper.pdf, page 4](/docs/paper.pdf#page=4)');
+  assert.equal(markdownPageLink({ fileName: 'a [v2].pdf', relPath: 'my docs/a [v2] (final).pdf', page: 1 }),
+    '[a \\[v2\\].pdf, page 1](/my%20docs/a%20%5Bv2%5D%20%28final%29.pdf#page=1)');
+  assert.equal(markdownPageLink({ fileName: 'x.pdf', relPath: null, fileUri: 'file:///tmp/x.pdf#page=2', page: 9 }), '[x.pdf, page 9](file:///tmp/x.pdf#page=9)');
+  assert.equal(markdownPageLink({ fileName: 'x.pdf', relPath: 'x.pdf', page: 0 }), '[x.pdf, page 1](/x.pdf#page=1)');
+});
+
+test('extension: a #page=N link opens at that page once, and the position is remembered per file, not per link', async () => {
+  const fake = makeVscode({ '/ws/docs/a.pdf': new Uint8Array(1) }, {});
+  const ext = loadExtension(fake);
+  const ctx = context();
+  ext.activate(ctx);
+  const reg = fake.getProvider();
+  const linked = fake.vscode.Uri.file('/ws/docs/a.pdf').with({ fragment: 'page=5&zoom=125' });
+  const fp = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(linked), fp.panel);
+  fp.receive({ type: 'ready' });
+  await tick();
+  assert.deepEqual(fp.sent[0].target, { page: 5, zoom: 1.25 });
+  fp.receive({ type: 'state', page: 5, zoom: 1.25 });
+  await tick();
+  const store = new (require('../src/stateStore').StateStore)(ctx.globalState);
+  assert.deepEqual(store.get('file:///ws/docs/a.pdf'), { page: 5, zoom: 1.25 });
+  assert.equal(store.get(linked.toString()), null);
+  assert.equal(ext.fileKey(linked), 'file:///ws/docs/a.pdf');
+  // a webview reload (hidden tab, window reload) does not jump back to the link target
+  fp.receive({ type: 'ready' });
+  await tick();
+  assert.equal(fp.sent.filter((m) => m.type === 'init')[1].target, null);
+  // a plain open has no target
+  const fp2 = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/ws/docs/a.pdf')), fp2.panel);
+  fp2.receive({ type: 'ready' });
+  await tick();
+  assert.equal(fp2.sent[0].target, null);
+  assert.deepEqual(fp2.sent[0].state, { page: 5, zoom: 1.25 });
+});
+
+test('extension: Go to Page asks for a number in range and sends it to the active viewer', async () => {
+  const fake = makeVscode({ '/ws/a.pdf': new Uint8Array(1) }, {});
+  const ext = loadExtension(fake);
+  ext.activate(context());
+  const reg = fake.getProvider();
+  const fp = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/ws/a.pdf')), fp.panel);
+  fp.receive({ type: 'ready' });
+  fp.receive({ type: 'info', pages: 20 });
+  fp.receive({ type: 'state', page: 3 });
+  await tick();
+  fake.inputs.push(' 12 ');
+  await fake.commands.get('pdfViewer.goToPage')();
+  const box = fake.inputBoxes[0];
+  assert.equal(box.value, '3');
+  assert.match(box.prompt, /1 to 20/);
+  assert.equal(box.validateInput('0') != null, true);
+  assert.equal(box.validateInput('21') != null, true);
+  assert.equal(box.validateInput('2.5') != null, true);
+  assert.equal(box.validateInput('abc') != null, true);
+  assert.equal(box.validateInput('20'), null);
+  assert.deepEqual(fp.sent.filter((m) => m.type === 'goTo'), [{ type: 'goTo', page: 12 }]);
+  fake.inputs.push(undefined); // Esc
+  await fake.commands.get('pdfViewer.goToPage')();
+  assert.equal(fp.sent.filter((m) => m.type === 'goTo').length, 1);
+  const pkg = require('../package.json');
+  const kb = pkg.contributes.keybindings.find((k) => k.command === 'pdfViewer.goToPage');
+  assert.equal(kb.key, 'ctrl+g');
+  assert.match(kb.when, /activeCustomEditorId == pdfViewer.preview/);
+});
+
+test('extension: Copy Link to This Page copies a Markdown link to the current page', async () => {
+  const fake = makeVscode({ '/ws/docs/my paper.pdf': new Uint8Array(1), '/elsewhere/b.pdf': new Uint8Array(1) }, {});
+  const ext = loadExtension(fake);
+  ext.activate(context());
+  const reg = fake.getProvider();
+  const fp = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/ws/docs/my paper.pdf').with({ fragment: 'page=2' })), fp.panel);
+  fp.receive({ type: 'ready' });
+  fp.receive({ type: 'state', page: 7 });
+  await tick();
+  await fake.commands.get('pdfViewer.copyPageLink')();
+  assert.equal(fake.clipboard.text, '[my paper.pdf, page 7](/docs/my%20paper.pdf#page=7)');
+  fp.dispose();
+  const fp2 = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/elsewhere/b.pdf')), fp2.panel);
+  fp2.receive({ type: 'ready' });
+  await tick();
+  await fake.commands.get('pdfViewer.copyPageLink')();
+  assert.equal(fake.clipboard.text, '[b.pdf, page 1](file:///elsewhere/b.pdf#page=1)');
+});
+
+// ---------- UPD1: sidebar setting ----------
+test('protocol: sidebar messages carry a boolean only', () => {
+  assert.deepEqual(parseWebviewMessage({ type: 'sidebar', open: true, x: 1 }), { type: 'sidebar', open: true });
+  assert.deepEqual(parseWebviewMessage({ type: 'sidebar', open: false }), { type: 'sidebar', open: false });
+  assert.equal(parseWebviewMessage({ type: 'sidebar', open: 'yes' }), null);
+  assert.equal(parseWebviewMessage({ type: 'sidebar' }), null);
+});
+
+async function sidebarInit(settings, ctx, before) {
+  const fake = makeVscode({ '/a.pdf': new Uint8Array(1) }, settings);
+  const ext = loadExtension(fake);
+  ext.activate(ctx);
+  const reg = fake.getProvider();
+  const fp = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/a.pdf')), fp.panel);
+  fp.receive({ type: 'ready' });
+  await tick();
+  if (before) { before(fp); await tick(); }
+  return { fp, ext };
+}
+
+test('extension: pdfViewer.sidebar = closed (default) never opens it, open always opens it', async () => {
+  const ctx = context();
+  const a = await sidebarInit({}, ctx);
+  assert.equal(a.fp.sent[0].sidebarOpen, false);
+  a.fp.receive({ type: 'sidebar', open: true }); // the user opens it in this tab only
+  await tick();
+  const b = await sidebarInit({}, ctx);
+  assert.equal(b.fp.sent[0].sidebarOpen, false, 'closed does not carry over to the next PDF');
+  const c = await sidebarInit({ sidebar: 'open' }, context());
+  assert.equal(c.fp.sent[0].sidebarOpen, true);
+});
+
+test('extension: pdfViewer.sidebar = remember keeps the last choice for the next PDF', async () => {
+  const ctx = context();
+  const a = await sidebarInit({ sidebar: 'remember' }, ctx);
+  assert.equal(a.fp.sent[0].sidebarOpen, false, 'closed until the user opens it once');
+  a.fp.receive({ type: 'sidebar', open: true });
+  await tick();
+  const b = await sidebarInit({ sidebar: 'remember' }, ctx);
+  assert.equal(b.fp.sent[0].sidebarOpen, true);
+  b.fp.receive({ type: 'sidebar', open: false });
+  await tick();
+  const c = await sidebarInit({ sidebar: 'remember' }, ctx);
+  assert.equal(c.fp.sent[0].sidebarOpen, false);
+  b.fp.receive({ type: 'sidebar', open: 'junk' });
+  await tick();
+  assert.equal(ctx.globalState.get(a.ext.SIDEBAR_KEY), false);
+});
+
+test('webview: uses the link target on first load only and reports sidebar toggles', () => {
+  const src = fs.readFileSync(path.join(__dirname, '..', 'media', 'viewer.js'), 'utf8');
+  assert.match(src, /const target = !keep \? S\.target : null;/, 'a reload on file change keeps the current position');
+  assert.match(src, /S\.target = null;/);
+  assert.match(src, /case 'goTo':/);
+  assert.match(src, /post\(\{ type: 'sidebar', open: !sb\.hidden \}\)/);
+  assert.match(src, /if \(st && typeof st\.sidebar === 'boolean'\) return;/, 'a restored view keeps its own sidebar state');
 });

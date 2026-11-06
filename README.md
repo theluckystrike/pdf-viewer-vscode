@@ -40,12 +40,22 @@ Type in "Find in PDF". Matches light up on every page as the search runs, and th
 
 The sidebar has two tabs. Outline shows the PDF's bookmarks as a tree, and a click jumps to the exact spot. Pages shows a thumbnail of each page, with the current one marked.
 
+The sidebar stays closed until you open it, also for LaTeX PDFs with bookmarks. To change that, set `pdfViewer.sidebar` to `open` (open it for every PDF) or `remember` (keep it the way you left it in the last PDF).
+
 
 ## Zoom and position
 
 Pick Fit width, Fit page, or 50% to 400% from the toolbar. `Ctrl` plus the mouse wheel, `Ctrl+=` and `Ctrl+-` also zoom (`Cmd` on macOS). They zoom the PDF, not the VS Code window.
 
 Each PDF reopens at the page and zoom where you left it. When the file changes on disk, for example after a LaTeX build, the viewer reloads it and stays on the same page.
+
+## Go to a page, and link to it from your notes
+
+Press `Ctrl+G` in a PDF, type a page number and press `Enter`.
+
+Links in Markdown can open a PDF at a page, the same way they work in a browser. Write `[paper](docs/paper.pdf#page=12)` in a `.md` file, then click it in the Markdown preview. `#nameddest=results` opens a named destination of the PDF, and `&zoom=150` sets the zoom.
+
+You don't have to type the links. "PDF: Copy Link to This Page" copies a link to the page you are reading, ready to paste into your notes.
 
 
 ## Keys
@@ -58,6 +68,9 @@ Each PDF reopens at the page and zoom where you left it. When the file changes o
 | `←` `→` | Previous or next page |
 | `Home`, `End` | First or last page |
 | `Ctrl+=`, `Ctrl+-` | Zoom in, zoom out |
+| `Ctrl+G` | Go to page |
+
+The viewer leaves other VS Code keys alone. `Ctrl+P` opens Quick Open and `Ctrl+Shift+P` opens the Command Palette, as in any other editor.
 
 ## Settings
 
@@ -67,6 +80,7 @@ Each PDF reopens at the page and zoom where you left it. When the file changes o
 | `pdfViewer.keepImagesInDarkMode` | `true` | Keep raster images in their colors in dark mode |
 | `pdfViewer.defaultZoom` | `page-width` | Zoom for a PDF you open for the first time |
 | `pdfViewer.rememberLastPage` | `true` | Reopen each PDF at the last page and zoom (up to 500 files) |
+| `pdfViewer.sidebar` | `closed` | `closed` keeps the sidebar closed, `open` opens it for every PDF, `remember` keeps your last choice |
 | `pdfViewer.maxFileSizeMB` | `200` | Ask before opening larger PDFs |
 | `pdfViewer.askForRating` | `true` | Ask one time for a Marketplace rating, after 5 files and 2 days. Turn it off with `false` |
 
@@ -93,6 +107,7 @@ A link inside a PDF opens in your browser only when you click it, and only for `
 - It is a viewer. It doesn't fill forms, add annotations or print.
 - Big files load fully into memory. Above 200 MB it asks first, and you can change the limit.
 - Pages render on demand, so a 1,000 page PDF opens at page 1 at once, but search reads every page and takes longer on very long files.
+- A `#page=` link opens the page from the Markdown preview. A `Ctrl`+click on the same link in the text editor opens the PDF at the page you read last, because VS Code drops the part after `#` there.
 - If another PDF extension is installed, VS Code may ask which one to use. Right-click a PDF and pick "Open With..." to switch.
 
 ## Credits

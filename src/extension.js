@@ -2,7 +2,7 @@
 const vscode = require('vscode');
 const path = require('path');
 const { buildHtml } = require('./html');
-const { parseWebviewMessage, readConfig } = require('./protocol');
+const { parseWebviewMessage, readConfig, parsePdfFragment, markdownPageLink } = require('./protocol');
 const { StateStore } = require('./stateStore');
 const { watchGlob, isSameFile } = require('./watch');
 const { createRatingPrompt } = require('./rate');
@@ -12,6 +12,12 @@ let rating = { success() {} };
 
 const VIEW_TYPE = 'pdfViewer.preview';
 const CONFIG = 'pdfViewer';
+const SIDEBAR_KEY = 'pdfViewer.sidebarOpen.v1';
+
+/** The file without a `#page=4` style fragment, so positions are remembered per file, not per link. */
+function fileKey(uri) {
+  return uri.fragment && typeof uri.with === 'function' ? uri.with({ fragment: '' }).toString() : uri.toString().split('#')[0];
+}
 
 /**
  * readFile returns a Node Buffer in the desktop extension host. VS Code serialises a Buffer to JSON
@@ -65,7 +71,10 @@ class PdfEditorProvider {
       wasm: u('pdfjs', 'wasm') + '/',
     }, webview.cspSource, undefined, { showSupportLinks: showLinks(vscode, 'pdfViewer') });
 
-    const entry = { panel, uri: document.uri, ready: false, forceLoad: false, visible: true };
+    const entry = { panel, uri: document.uri, ready: false, forceLoad: false, visible: true, page: 1 };
+    const key = fileKey(document.uri);
+    // `report.pdf#page=4` from a Markdown link: open at that page once, then behave as usual.
+    let target = parsePdfFragment(document.uri.fragment);
     this.panels.add(entry);
     if (panel.active) this.active = entry;
     const disposables = [];
@@ -107,9 +116,12 @@ class PdfEditorProvider {
         send({
           type: 'init',
           config: cfg,
-          state: cfg.rememberPage ? this.store.get(document.uri.toString()) : null,
+          state: cfg.rememberPage ? this.store.get(key) : null,
+          target,
+          sidebarOpen: this.sidebarDefault(cfg),
           fileName: path.basename(document.uri.path),
         });
+        target = null; // a webview reload (hidden tab, window reload) keeps its own position
         load(false);
         syncVisibility();
       } else if (m.type === 'error') {
@@ -123,7 +135,11 @@ class PdfEditorProvider {
         entry.forceLoad = true;
         load(false);
       } else if (m.type === 'state') {
-        if (this.config().rememberPage) this.store.set(document.uri.toString(), m.page, m.zoom);
+        entry.page = m.page;
+        if (this.config().rememberPage) this.store.set(key, m.page, m.zoom);
+      } else if (m.type === 'sidebar') {
+        entry.sidebarOpen = m.open;
+        if (this.config().sidebar === 'remember') this.context.globalState.update(SIDEBAR_KEY, m.open);
       } else if (m.type === 'openExternal') {
         // Only after a user click on a link inside the PDF, and only http, https and mailto (checked in protocol.js).
         vscode.env.openExternal(vscode.Uri.parse(m.url, true));
@@ -162,8 +178,46 @@ class PdfEditorProvider {
     });
   }
 
+  /** Whether a newly opened PDF shows the outline and pages sidebar (setting pdfViewer.sidebar). */
+  sidebarDefault(cfg) {
+    if (cfg.sidebar === 'open') return true;
+    if (cfg.sidebar === 'remember') return this.context.globalState.get(SIDEBAR_KEY) === true;
+    return false;
+  }
+
   sendCommand(name) {
     if (this.active) this.active.panel.webview.postMessage({ type: 'command', name });
+  }
+
+  async goToPage() {
+    const entry = this.active;
+    if (!entry) return;
+    const max = entry.pages || 0;
+    const value = await vscode.window.showInputBox({
+      title: 'Go to page',
+      prompt: max ? `Page number, 1 to ${max}` : 'Page number',
+      value: String(entry.page || 1),
+      validateInput: (v) => {
+        const n = Number(v.trim());
+        if (!Number.isInteger(n) || n < 1) return 'Type a page number.';
+        if (max && n > max) return `This PDF has ${max} pages.`;
+        return null;
+      },
+    });
+    if (value == null || !this.panels.has(entry)) return;
+    entry.panel.webview.postMessage({ type: 'goTo', page: Number(value.trim()) });
+  }
+
+  async copyPageLink() {
+    const entry = this.active;
+    if (!entry) return;
+    const uri = entry.uri.fragment && typeof entry.uri.with === 'function' ? entry.uri.with({ fragment: '' }) : entry.uri;
+    const folder = vscode.workspace.getWorkspaceFolder ? vscode.workspace.getWorkspaceFolder(uri) : undefined;
+    const relPath = folder ? path.posix.relative(folder.uri.path, uri.path) : null;
+    const link = markdownPageLink({ fileName: path.posix.basename(uri.path), relPath, fileUri: uri.toString(), page: entry.page || 1 });
+    await vscode.env.clipboard.writeText(link);
+    vscode.window.showInformationMessage(`Copied a Markdown link to page ${entry.page || 1}. Paste it in a .md file and click it to open the PDF at that page.`);
+    return link;
   }
 }
 
@@ -189,6 +243,8 @@ function activate(context) {
   for (const [id, name] of Object.entries(cmds)) {
     context.subscriptions.push(vscode.commands.registerCommand(id, () => provider.sendCommand(name)));
   }
+  context.subscriptions.push(vscode.commands.registerCommand('pdfViewer.goToPage', () => provider.goToPage()));
+  context.subscriptions.push(vscode.commands.registerCommand('pdfViewer.copyPageLink', () => provider.copyPageLink()));
   context.subscriptions.push(vscode.commands.registerCommand('pdfViewer.forgetPositions', async () => {
     await provider.store.clear();
     vscode.window.showInformationMessage('PDF Viewer: forgot the last page of every PDF.');
@@ -202,4 +258,4 @@ function activate(context) {
 
 function deactivate() {}
 
-module.exports = { activate, deactivate, PdfEditorProvider, VIEW_TYPE, toPlainBytes };
+module.exports = { activate, deactivate, PdfEditorProvider, VIEW_TYPE, toPlainBytes, fileKey, SIDEBAR_KEY };

@@ -25,6 +25,8 @@ const S = {
   scale: 1,
   page: 1,
   pendingRestore: null,
+  target: null, // { page, dest, zoom } from a link such as report.pdf#page=4, used on the first load only
+  sidebarDefault: null, // from the pdfViewer.sidebar setting, used when this view has no saved sidebar state
   darkOverride: null, // null = follow config, true/false = toggled by the user in this view
   rendered: new Map(), // pageIndex -> {scale, dark, task}
   textCache: new Map(), // pageIndex -> textContent items
@@ -55,6 +57,8 @@ window.addEventListener('message', (ev) => {
     case 'init':
       if (m.config) S.config = Object.assign(S.config, m.config);
       if (m.state && !S.pendingRestore) S.pendingRestore = m.state;
+      if (m.target && typeof m.target === 'object') S.target = m.target;
+      if (typeof m.sidebarOpen === 'boolean') applySidebarDefault(m.sidebarOpen);
       $('fileName').textContent = typeof m.fileName === 'string' ? m.fileName : '';
       applyDarkClass();
       break;
@@ -76,6 +80,9 @@ window.addEventListener('message', (ev) => {
       break;
     case 'visibility':
       setVisible(m.visible !== false);
+      break;
+    case 'goTo':
+      if (Number.isInteger(m.page) && S.numPages) { scrollToPage(m.page); saveState(); $('viewer').focus(); }
       break;
   }
 });
@@ -137,11 +144,16 @@ async function openDocument(data, isReload) {
   S.sizes = new Array(doc.numPages).fill(null).map(() => ({ width: vp.width, height: vp.height }));
   const restore = keep || S.pendingRestore || vscode.getState() || null;
   S.pendingRestore = null;
-  S.zoom = restore && restore.zoom != null ? restore.zoom : S.config.defaultZoom;
+  const target = !keep ? S.target : null;
+  S.target = null;
+  S.zoom = target && target.zoom ? C.clampScale(target.zoom) : restore && restore.zoom != null ? restore.zoom : S.config.defaultZoom;
   buildPages();
   applyZoom(false);
-  const startPage = restore && Number.isInteger(restore.page) ? Math.min(Math.max(1, restore.page), S.numPages) : 1;
+  let startPage = restore && Number.isInteger(restore.page) ? Math.min(Math.max(1, restore.page), S.numPages) : 1;
+  if (target && Number.isInteger(target.page)) startPage = Math.min(Math.max(1, target.page), S.numPages);
   scrollToPage(startPage, null, keep ? keep.scrollRatio : 0);
+  if (target && (target.page || target.zoom)) saveState();
+  if (target && typeof target.dest === 'string' && !target.page) goToDest(target.dest);
   $('status').textContent = '';
   post({ type: 'info', pages: doc.numPages });
   scheduleRender();
@@ -758,13 +770,23 @@ function updateThumbSelection() {
 }
 
 // ---------- sidebar ----------
-function toggleSidebar(force) {
+function toggleSidebar(force, fromSetting) {
   const sb = $('sidebar');
+  const was = !sb.hidden;
   sb.hidden = typeof force === 'boolean' ? !force : !sb.hidden;
   $('sidebarBtn').setAttribute('aria-pressed', sb.hidden ? 'false' : 'true');
   vscode.setState(Object.assign({}, vscode.getState() || {}, { sidebar: !sb.hidden }));
+  if (!fromSetting && was !== !sb.hidden) post({ type: 'sidebar', open: !sb.hidden });
+  if (was === !sb.hidden) return;
   if (S.numPages) applyZoom(true);
   if (!sb.hidden && S.thumbsObserver) document.querySelectorAll('#thumbs .thumb').forEach((t) => { S.thumbsObserver.unobserve(t); S.thumbsObserver.observe(t); });
+}
+// The pdfViewer.sidebar setting decides the first state. A view that already has its own state
+// (the user toggled it, or the webview was restored) keeps it.
+function applySidebarDefault(open) {
+  const st = vscode.getState();
+  if (st && typeof st.sidebar === 'boolean') return;
+  if (open !== !$('sidebar').hidden) toggleSidebar(open, true);
 }
 function showTab(name, byUser) {
   if (byUser) $('sidebar').dataset.userTab = '1';
@@ -900,7 +922,7 @@ function wireUi() {
   new MutationObserver(() => { if (S.darkOverride == null) onDarkChanged(); })
     .observe(document.body, { attributes: true, attributeFilter: ['class', 'data-vscode-theme-kind'] });
   const st = vscode.getState();
-  if (st && st.sidebar) toggleSidebar(true);
+  if (st && st.sidebar) toggleSidebar(true, true);
   applyDarkClass();
 }
 

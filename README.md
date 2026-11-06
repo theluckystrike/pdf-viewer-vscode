@@ -3,17 +3,11 @@
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pdf-viewer-dark?label=VS%20Code%20installs" alt="VS Code installs"></a>
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pdf-viewer-dark?label=version" alt="Version"></a>
 
-Read PDFs inside VS Code with dark pages that keep photos and charts in their real colors, and find any word with highlights.
+For developers who read specs and papers next to their code, PDF Reader shows PDFs in VS Code with dark pages that keep photos and charts in their real colors.
 
-| Dark pages, search and outline | Light theme |
-|---|---|
-| <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-dark.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-dark.png" alt="Dark mode. The text is light on a dark page, the earthquake map keeps its colors, two matches for Japan are highlighted, and the outline is open on the left" width="100%"></a> | <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-light.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-light.png" alt="The same report in a light VS Code theme, with the page shown as printed" width="100%"></a> |
+![A 3 page earthquake report open in VS Code with dark pages. The outline is open on the left, the search box has Japan with 1 of 4 matches, and the map keeps its original colors](https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-pdf-dark.png)
 
-| Page thumbnails, dark | Outline jump, light |
-|---|---|
-| <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-pages.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-pages.png" alt="The Pages tab with three thumbnails, page 2 selected at fit page zoom, and a bar chart in its original colors" width="100%"></a> | <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/outline-light.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/outline-light.png" alt="A click on 2. Largest events in the outline opens page 2 at the table of the largest earthquakes" width="100%"></a> |
-
-*Real output, light and dark. The extension's own webview code and its bundled pdf.js render [`test/fixtures/earthquakes-october-2026.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/main/test/fixtures/earthquakes-october-2026.pdf), a 3 page report built from the real USGS earthquake catalog for October 2026. [`scripts/readme-shots`](https://github.com/theluckystrike/pdf-viewer-vscode/tree/main/scripts/readme-shots) has the scripts that build the PDF and capture the shots in headless Chrome.*
+*A real VS Code 1.142 window running this extension on [`test/fixtures/earthquakes-october-2026.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/main/test/fixtures/earthquakes-october-2026.pdf), a 3 page report generated from the USGS earthquake catalog for October 2026.*
 
 - Dark pages that are easy on the eyes at night. Text, lines and backgrounds go dark. Photos keep their colors.
 - Find in PDF highlights every match and jumps between them with Enter. The outline and page thumbnails sit in one sidebar.
@@ -23,6 +17,10 @@ Read PDFs inside VS Code with dark pages that keep photos and charts in their re
 
 1. Install the extension.
 2. Click any `.pdf` file in the Explorer. Press `Ctrl+F` (`Cmd+F` on macOS) to search, and click the moon button to switch dark pages on or off.
+
+![A click on the PDF in the Explorer opens it with dark pages. Typing Japan highlights the matches, Enter jumps to the next one, and the moon button switches the page to light and back](https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/demo-pdf.gif)
+
+*Recorded in the same window. The white arrow is drawn in to show where each click lands.*
 
 Run "Get Started with PDF Reader" from the Welcome page for a short tour.
 
@@ -71,6 +69,18 @@ Each PDF reopens at the page and zoom where you left it. When the file changes o
 | `pdfViewer.rememberLastPage` | `true` | Reopen each PDF at the last page and zoom (up to 500 files) |
 | `pdfViewer.maxFileSizeMB` | `200` | Ask before opening larger PDFs |
 | `pdfViewer.askForRating` | `true` | Ask one time for a Marketplace rating, after 5 files and 2 days. Turn it off with `false` |
+
+## More screenshots
+
+| Dark pages, search and outline | Light theme |
+|---|---|
+| <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-dark.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-dark.png" alt="Dark mode. The text is light on a dark page, the earthquake map keeps its colors, two matches for Japan are highlighted, and the outline is open on the left" width="100%"></a> | <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-light.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-light.png" alt="The same report in a light VS Code theme, with the page shown as printed" width="100%"></a> |
+
+| Page thumbnails, dark | Outline jump, light |
+|---|---|
+| <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-pages.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-pages.png" alt="The Pages tab with three thumbnails, page 2 selected at fit page zoom, and a bar chart in its original colors" width="100%"></a> | <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/outline-light.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/outline-light.png" alt="A click on 2. Largest events in the outline opens page 2 at the table of the largest earthquakes" width="100%"></a> |
+
+*Real output, light and dark. The extension's own webview code and its bundled pdf.js render [`test/fixtures/earthquakes-october-2026.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/main/test/fixtures/earthquakes-october-2026.pdf), a 3 page report built from the real USGS earthquake catalog for October 2026. [`scripts/readme-shots`](https://github.com/theluckystrike/pdf-viewer-vscode/tree/main/scripts/readme-shots) has the scripts that build the PDF and capture the shots in headless Chrome.*
 
 ## Privacy and security
 

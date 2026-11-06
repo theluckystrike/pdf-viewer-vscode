@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6 (2026-11-06)
+
+- The Marketplace page now starts with a screenshot of a real VS Code window with dark pages, the outline and a search, and a short GIF of opening a PDF, searching and switching dark pages. Both were made from generated sample files. The images load from the GitHub repo and are not packed into the extension, so the download size stays the same.
+
 ## 0.1.5 (2026-11-06)
 
 - A small line at the bottom right of the viewer has two links, "Sponsor" (GitHub Sponsors) and "More free viewers". The new setting `pdfViewer.showSupportLinks` (default `true`) hides it, and so does the "Hide" link next to them. There is no popup, and nothing is sent anywhere.

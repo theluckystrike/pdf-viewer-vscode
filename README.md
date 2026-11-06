@@ -1,4 +1,4 @@
-# PDF Reader for VS Code: dark mode, search, outline
+# PDF Reader for VS Code with dark mode, search and outline
 
 Read PDFs inside VS Code with dark pages that keep photos and charts in their real colors, and find any word with highlights.
 
@@ -17,11 +17,11 @@ Read PDFs inside VS Code with dark pages that keep photos and charts in their re
 1. Install the extension.
 2. Click any `.pdf` file in the Explorer. Press `Ctrl+F` (`Cmd+F` on macOS) to search, and click the moon button to switch dark pages on or off.
 
-Run "Get Started with PDF Reader: Dark Mode, Search, Outline" from the Welcome page for a short tour.
+Run "Get Started with PDF Reader" from the Welcome page for a short tour.
 
 ## Dark mode that leaves images alone
 
-Most dark PDF modes invert the whole page, so a photo of a blue sky turns orange. PDF Reader: Dark Mode, Search, Outline inverts the page, then paints the original pixels of each raster image back on top.
+Most dark PDF modes invert the whole page, so a photo of a blue sky turns orange. PDF Reader inverts the page, then paints the original pixels of each raster image back on top.
 
 <img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/light-vs-dark.png" alt="The same page in the light theme on the left and in dark mode on the right. The photo is identical on both sides." width="640">
 

@@ -2,7 +2,7 @@
   "name": "pdf-viewer-dark",
   "displayName": "PDF Reader: Dark Mode, Search, Outline",
   "description": "Read PDFs in VS Code with a real dark mode that keeps photos in their true colors, plus search with highlights, outline, page thumbnails and zoom. Works offline.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -29,7 +29,7 @@
     "dark pdf",
     "night mode",
     "dark theme",
-    "invert",
+    "latex preview",
     "pdf search",
     "find in pdf",
     "outline",
@@ -48,7 +48,7 @@
     "arxiv",
     "datasheet",
     "offline",
-    "custom editor"
+    "pdf dark mode"
   ],
   "main": "./src/extension.js",
   "activationEvents": [],
@@ -225,7 +225,7 @@
             "title": "Open a PDF",
             "description": "Click any .pdf file in the Explorer. It opens in this viewer.\n[Open a PDF file](command:pdfViewer.openWith)",
             "media": {
-              "image": "images/screenshot-light.png",
+              "image": "images/walkthrough-light.png",
               "altText": "A PDF open in the viewer with a light theme."
             },
             "completionEvents": [
@@ -237,8 +237,8 @@
             "title": "Switch dark pages on or off",
             "description": "Pages follow your theme. The moon button in the PDF toolbar switches dark pages for this file. Photos keep their colors.\n[Toggle dark pages](command:pdfViewer.toggleDarkMode)",
             "media": {
-              "image": "images/screenshot-dark.png",
-              "altText": "Dark pages with a photo in its original colors."
+              "image": "images/walkthrough-dark.png",
+              "altText": "Dark pages with a map image in its original colors."
             },
             "completionEvents": [
               "onCommand:pdfViewer.toggleDarkMode"

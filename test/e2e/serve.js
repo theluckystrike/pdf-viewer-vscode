@@ -9,6 +9,7 @@ const { buildHtml } = require('../../src/html');
 const root = path.join(__dirname, '..', '..');
 const pdfArg = process.argv[2] || path.join(root, 'test', 'fixtures', 'sample.pdf');
 const theme = process.argv[3] || 'dark';
+const shownName = process.argv[4] || 'field-report.pdf';
 const TYPES = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.pdf': 'application/pdf', '.wasm': 'application/wasm', '.html': 'text/html' };
 
 const DARK_VARS = `--vscode-font-family:-apple-system,BlinkMacSystemFont,sans-serif;--vscode-font-size:13px;--vscode-foreground:#cccccc;--vscode-editor-background:#1f1f1f;--vscode-editorWidget-background:#202020;--vscode-sideBar-background:#181818;--vscode-editorGroup-border:#2b2b2b;--vscode-input-background:#313131;--vscode-input-foreground:#cccccc;--vscode-input-border:#3c3c3c;--vscode-dropdown-background:#313131;--vscode-dropdown-foreground:#cccccc;--vscode-focusBorder:#0078d4;--vscode-list-hoverBackground:#2a2d2e;--vscode-toolbar-hoverBackground:#5a5d5e50;--vscode-inputOption-activeBackground:#2489db82;--vscode-inputOption-activeBorder:#2488db;--vscode-button-background:#0078d4;--vscode-button-foreground:#ffffff`;
@@ -27,7 +28,7 @@ window.__posted = [];
 let __state = null;
 window.acquireVsCodeApi = () => ({
   postMessage(m) { window.__posted.push(m); if (m.type === 'ready') {
-    window.postMessage({ type: 'init', config: { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width' }, state: null, fileName: 'field-report.pdf' }, '*');
+    window.postMessage({ type: 'init', config: { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width' }, state: null, fileName: ${JSON.stringify(shownName)} }, '*');
     fetch('/file.pdf').then(r => r.arrayBuffer()).then(b => window.postMessage({ type: 'load', data: new Uint8Array(b) }, '*'));
   } },
   getState() { return __state; }, setState(s) { __state = s; },

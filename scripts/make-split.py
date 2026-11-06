@@ -6,7 +6,9 @@ light = Image.open(root / "screenshot-light.png").convert("RGB")
 dark = Image.open(root / "screenshot-dark.png").convert("RGB")
 w, h = light.size
 # crop to the page column so both halves show the same part of the page
-box = (330, 34, 1180, 800)
+# box in CSS pixels of a 1280 px wide viewport, scaled to the screenshot's device pixel ratio
+k = w / 1280
+box = tuple(round(v * k) for v in (250, 34, 1250, min(800, h / k)))
 l = light.crop(box)
 d = dark.crop(box)
 cw = l.size[0]

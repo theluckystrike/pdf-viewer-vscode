@@ -1,12 +1,19 @@
 # PDF Reader for VS Code with dark mode, search and outline
 
+<a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pdf-viewer-dark?label=VS%20Code%20installs" alt="VS Code installs"></a>
+<a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pdf-viewer-dark?label=version" alt="Version"></a>
+
 Read PDFs inside VS Code with dark pages that keep photos and charts in their real colors, and find any word with highlights.
 
-<p><a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pdf-viewer-dark" alt="Version"></a> <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pdf-viewer-dark" alt="Installs"></a> <a href="https://open-vsx.org/extension/zovo/pdf-viewer-dark"><img src="https://img.shields.io/open-vsx/v/zovo/pdf-viewer-dark" alt="Open VSX"></a></p>
+| Dark pages, search and outline | Light theme |
+|---|---|
+| <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-dark.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-dark.png" alt="Dark mode. The text is light on a dark page, the earthquake map keeps its colors, two matches for Japan are highlighted, and the outline is open on the left" width="100%"></a> | <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-light.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-light.png" alt="The same report in a light VS Code theme, with the page shown as printed" width="100%"></a> |
 
-<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/screenshot-dark.png" alt="A PDF in dark mode. The text is light on a dark page, the mountain photo keeps its blue sky, three matches for &quot;latency&quot; are highlighted, and the outline is open on the left." width="100%">
+| Page thumbnails, dark | Outline jump, light |
+|---|---|
+| <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-pages.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/screenshot-pages.png" alt="The Pages tab with three thumbnails, page 2 selected at fit page zoom, and a bar chart in its original colors" width="100%"></a> | <a href="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/outline-light.png"><img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/outline-light.png" alt="A click on 2. Largest events in the outline opens page 2 at the table of the largest earthquakes" width="100%"></a> |
 
-*Real output. The extension's own webview code renders [`test/fixtures/sample.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/HEAD/test/fixtures/sample.pdf) with the bundled pdf.js, captured in headless Chromium by [`test/e2e/run.py`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/HEAD/test/e2e/run.py).*
+*Real output, light and dark. The extension's own webview code and its bundled pdf.js render [`test/fixtures/earthquakes-october-2026.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/main/test/fixtures/earthquakes-october-2026.pdf), a 3 page report built from the real USGS earthquake catalog for October 2026. [`scripts/readme-shots`](https://github.com/theluckystrike/pdf-viewer-vscode/tree/main/scripts/readme-shots) has the scripts that build the PDF and capture the shots in headless Chrome.*
 
 - Dark pages that are easy on the eyes at night. Text, lines and backgrounds go dark. Photos keep their colors.
 - Find in PDF highlights every match and jumps between them with Enter. The outline and page thumbnails sit in one sidebar.
@@ -23,7 +30,7 @@ Run "Get Started with PDF Reader" from the Welcome page for a short tour.
 
 Most dark PDF modes invert the whole page, so a photo of a blue sky turns orange. PDF Reader inverts the page, then paints the original pixels of each raster image back on top.
 
-<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/light-vs-dark.png" alt="The same page in the light theme on the left and in dark mode on the right. The photo is identical on both sides." width="640">
+<img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/light-vs-dark.png" alt="The same page in the light theme on the left and in dark mode on the right. The map image has the same colors on both sides." width="640">
 
 By default the pages follow your VS Code theme. Dark and high contrast dark themes get dark pages, light themes get the page as printed. The moon button in the toolbar, or "PDF: Toggle Dark Pages" in the Command Palette, switches it for the open file. Set `pdfViewer.darkMode` to `on` or `off` to stop following the theme.
 
@@ -35,7 +42,6 @@ Type in "Find in PDF". Matches light up on every page as the search runs, and th
 
 The sidebar has two tabs. Outline shows the PDF's bookmarks as a tree, and a click jumps to the exact spot. Pages shows a thumbnail of each page, with the current one marked.
 
-<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/screenshot-pages.png" alt="Pages tab with four thumbnails, page 2 selected, and the page shown at fit page zoom with a bar chart in its original colors." width="100%">
 
 ## Zoom and position
 
@@ -43,7 +49,6 @@ Pick Fit width, Fit page, or 50% to 400% from the toolbar. `Ctrl` plus the mouse
 
 Each PDF reopens at the page and zoom where you left it. When the file changes on disk, for example after a LaTeX build, the viewer reloads it and stays on the same page.
 
-<img src="https://github.com/theluckystrike/pdf-viewer-vscode/raw/HEAD/images/screenshot-light.png" alt="The sample PDF in a light VS Code theme, with pages shown as printed." width="100%">
 
 ## Keys
 
@@ -82,3 +87,5 @@ A link inside a PDF opens in your browser only when you click it, and only for `
 ## Credits
 
 PDF rendering by [pdf.js](https://github.com/mozilla/pdf.js) from Mozilla (Apache-2.0), bundled in `media/pdfjs`. The extension itself is MIT licensed.
+
+[Rate this extension](https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark&ssr=false#review-details) on the Marketplace if it helps you read PDFs. A rating helps other people find it.

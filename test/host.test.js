@@ -405,9 +405,11 @@ test('manifest and README: links point at the public repo, images use absolute r
   const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8');
   const imgs = [...readme.matchAll(/<img[^>]*\ssrc="([^"]+)"/g), ...readme.matchAll(/!\[[^\]]*\]\(([^)\s]+)/g)].map((m) => m[1]).filter((u) => !u.includes('img.shields.io'));
   assert.ok(imgs.length >= 4, 'at least 4 screenshots');
+  // the Marketplace needs absolute image URLs; raw.githubusercontent.com on main
+  const raw = 'https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/';
   for (const u of imgs) {
-    assert.ok(u.startsWith(repo + '/raw/HEAD/'), u);
-    assert.ok(fs.existsSync(path.join(__dirname, '..', u.slice((repo + '/raw/HEAD/').length))), 'file exists: ' + u);
+    assert.ok(u.startsWith(raw), u);
+    assert.ok(fs.existsSync(path.join(__dirname, '..', u.slice(raw.length))), 'file exists: ' + u);
   }
   // no relative links: vsce would rewrite them to a guessed URL, and test/ is not in the VSIX
   const links = [...readme.matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]);

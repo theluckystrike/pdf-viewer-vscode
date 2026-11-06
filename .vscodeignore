@@ -9,3 +9,8 @@ icon.svg
 **/*.map
 NOTES.md
 package-lock.json
+images/outline-light.png
+images/screenshot-pages.png
+images/light-vs-dark.png
+images/screenshot-dark.png
+images/screenshot-light.png

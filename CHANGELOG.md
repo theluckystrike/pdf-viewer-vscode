@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 (2026-11-06)
+
+- README opens with four real screenshots in light and dark themes, made from a report built on the real USGS earthquake catalog for October 2026, plus an installs badge and a version badge.
+- The walkthrough uses its own smaller images, so the README screenshots stay out of the package (2.81 MB).
+- Keywords updated. No change to the viewer itself. A run over 38 real PDFs (up to 2,000 pages) turned up no new bugs.
+- The browser test can use an already running Chrome over CDP (`PDFV_CDP`), and `test/e2e/serve.js` takes the file name to show.
+
 ## 0.1.1 (2026-11-06)
 
 - Shorter names in menus and the editor picker: "PDF Reader".

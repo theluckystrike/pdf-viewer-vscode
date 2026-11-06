@@ -5,9 +5,11 @@ highlights matches, dark mode darkens the page but keeps the photo's colors, CSP
 With --shot PATH it also saves the README screenshot.
 
 Run: python3 test/e2e/run.py [--shot images/screenshot-dark.png] [--light-shot images/screenshot-light.png]
+Set PDFV_CDP=http://127.0.0.1:<port> to use an already running Chrome (for example one from agent-chrome) over CDP.
 """
 import argparse
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -33,9 +35,10 @@ def run_theme(p, theme, shot, thumbs_shot=None):
     proc, port = start_server(theme)
     results = []
     try:
-        browser = p.chromium.launch(headless=True)
+        cdp = os.environ.get("PDFV_CDP")
+        browser = p.chromium.connect_over_cdp(cdp) if cdp else p.chromium.launch(headless=True)
         try:
-            page = browser.new_page(viewport={"width": 1280, "height": 800}, device_scale_factor=1)
+            page = browser.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1).new_page()
             errors = []
             page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
             page.on("pageerror", lambda e: errors.append(str(e)))

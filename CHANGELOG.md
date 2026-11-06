@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 (2026-11-06)
+
+- Listing only, no change to the extension. The display name is now "PDF Viewer & Reader with Dark Mode" and the description is one sentence, so the listing uses the words people search for (pdf viewer (34), pdf (not in top 100)).
+- The 30 keywords start with the most searched terms.
+- The README ends with links to the other Zovo extensions.
+
 ## 0.1.2 (2026-11-06)
 
 - README opens with four real screenshots in light and dark themes, made from a report built on the real USGS earthquake catalog for October 2026, plus an installs badge and a version badge.

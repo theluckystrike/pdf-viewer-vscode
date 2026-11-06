@@ -2,6 +2,7 @@
 // Builds the webview HTML. Pure function so tests can check the Content-Security-Policy.
 
 const crypto = require('crypto');
+const { footerHtml, FOOTER_CSS } = require('./support');
 
 function nonce() {
   return crypto.randomBytes(18).toString('base64').replace(/[^A-Za-z0-9]/g, '');
@@ -14,8 +15,10 @@ function escapeAttr(s) {
 /**
  * uris: { core, viewer, css, pdfjs, worker, cmaps, fonts, wasm } as webview URIs (strings).
  * cspSource: webview.cspSource.
+ * opts.showSupportLinks: false hides the small Sponsor and More free viewers footer (setting pdfViewer.showSupportLinks).
  */
-function buildHtml(uris, cspSource, n) {
+function buildHtml(uris, cspSource, n, opts) {
+  const footer = footerHtml('pdfViewer', !(opts && opts.showSupportLinks === false), 'zovo-support-fixed');
   const N = n || nonce();
   const src = escapeAttr(cspSource);
   const csp = [
@@ -39,6 +42,7 @@ function buildHtml(uris, cspSource, n) {
 <meta http-equiv="Content-Security-Policy" content="${csp}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="${a('css')}" nonce="${N}">
+${footer ? `<style nonce="${N}">${FOOTER_CSS}</style>` : ''}
 <title>PDF</title>
 </head>
 <body data-pdfjs="${a('pdfjs')}" data-worker="${a('worker')}" data-cmaps="${a('cmaps')}" data-fonts="${a('fonts')}" data-wasm="${a('wasm')}">
@@ -87,6 +91,7 @@ function buildHtml(uris, cspSource, n) {
   <div id="viewer" tabindex="0"><div id="pages"></div></div>
 </div>
 <div id="message" hidden role="alert"></div>
+${footer}
 <script nonce="${N}" src="${a('core')}"></script>
 <script nonce="${N}" type="module" src="${a('viewer')}"></script>
 </body>

@@ -6,6 +6,7 @@ const { parseWebviewMessage, readConfig } = require('./protocol');
 const { StateStore } = require('./stateStore');
 const { watchGlob, isSameFile } = require('./watch');
 const { createRatingPrompt } = require('./rate');
+const { registerSupport, commandUris, showLinks } = require('./support');
 
 let rating = { success() {} };
 
@@ -50,7 +51,8 @@ class PdfEditorProvider {
   async resolveCustomEditor(document, panel) {
     const media = vscode.Uri.joinPath(this.context.extensionUri, 'media');
     const webview = panel.webview;
-    webview.options = { enableScripts: true, localResourceRoots: [media] };
+    // Command links are limited to the two support commands and the settings page (footer "Hide" link).
+    webview.options = { enableScripts: true, localResourceRoots: [media], enableCommandUris: commandUris('pdfViewer') };
     const u = (...p) => webview.asWebviewUri(vscode.Uri.joinPath(media, ...p)).toString();
     webview.html = buildHtml({
       core: u('core.js'),
@@ -61,7 +63,7 @@ class PdfEditorProvider {
       cmaps: u('pdfjs', 'cmaps') + '/',
       fonts: u('pdfjs', 'standard_fonts') + '/',
       wasm: u('pdfjs', 'wasm') + '/',
-    }, webview.cspSource);
+    }, webview.cspSource, undefined, { showSupportLinks: showLinks(vscode, 'pdfViewer') });
 
     const entry = { panel, uri: document.uri, ready: false, forceLoad: false, visible: true };
     this.panels.add(entry);
@@ -167,6 +169,7 @@ class PdfEditorProvider {
 
 function activate(context) {
   rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pdf-viewer-dark', section: 'pdfViewer', message: (n) => `PDF Viewer has opened ${n} files for you. A rating helps other people find it.` });
+  registerSupport({ vscode, context, prefix: 'pdfViewer', selfId: 'zovo.pdf-viewer-dark' });
   const provider = new PdfEditorProvider(context);
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {

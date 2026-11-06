@@ -415,3 +415,54 @@ test('manifest and README: links point at the public repo, images use absolute r
   const links = [...readme.matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]);
   for (const l of links) assert.match(l, /^(https:|mailto:|#)/, l);
 });
+
+// ---------- support links (Sponsor, More free viewers) ----------
+test('support: package.json has the sponsor field, the two commands and the setting', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  const support = require('../src/support');
+  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike');
+  assert.equal(pkg.sponsor.url, support.sponsorUrl());
+  const ids = pkg.contributes.commands.map((c) => c.command);
+  assert.ok(ids.includes('pdfViewer.supportDeveloper') && ids.includes('pdfViewer.moreViewers'));
+  assert.equal(pkg.contributes.configuration.properties['pdfViewer.showSupportLinks'].default, true);
+  // only set funding links show, and this extension is not in its own cross-sell list
+  assert.ok(support.fundingLinks().every((l) => /^https:\/\//.test(l.url)));
+  assert.ok(support.otherProducts('zovo.pdf-viewer-dark').every((p) => p.id !== 'zovo.pdf-viewer-dark'));
+});
+
+test('support: the footer shows by default and pdfViewer.showSupportLinks=false hides it', async () => {
+  for (const [settings, shown] of [[{}, true], [{ showSupportLinks: false }, false]]) {
+    const fake = makeVscode({ '/a.pdf': new Uint8Array(1) }, settings);
+    const ext = loadExtension(fake);
+    ext.activate(context());
+    const reg = fake.getProvider();
+    const fp = fakePanel();
+    await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/a.pdf')), fp.panel);
+    const html = fp.panel.webview.html;
+    assert.equal(/id="zovo-support"/.test(html), shown, JSON.stringify(settings));
+    assert.equal(html.includes('command:pdfViewer.supportDeveloper'), shown);
+    assert.deepEqual(fp.panel.webview.options.enableCommandUris, ['pdfViewer.supportDeveloper', 'pdfViewer.moreViewers', 'workbench.action.openSettings']);
+    assert.ok(fake.commands.has('pdfViewer.supportDeveloper') && fake.commands.has('pdfViewer.moreViewers'));
+  }
+});
+
+test('support: Sponsor opens GitHub Sponsors, More free viewers installs only the picked extension', async () => {
+  const fake = makeVscode({}, {});
+  const ran = [];
+  fake.vscode.commands.executeCommand = async (...a) => { ran.push(a); };
+  fake.vscode.extensions = { getExtension: () => undefined };
+  let pickFn = async () => undefined;
+  fake.vscode.window.showQuickPick = (items) => pickFn(items);
+  const ext = loadExtension(fake);
+  ext.activate(context());
+  await fake.commands.get('pdfViewer.supportDeveloper')();
+  assert.deepEqual(fake.opened, ['https://github.com/sponsors/theluckystrike']);
+  await fake.commands.get('pdfViewer.moreViewers')(); // closed without a pick: nothing happens
+  assert.equal(ran.filter((a) => a[0] === 'workbench.extensions.installExtension').length, 0);
+  pickFn = async (items) => items.find((i) => i.product && i.product.id === 'zovo.table-viewer-vscode');
+  await fake.commands.get('pdfViewer.moreViewers')();
+  assert.deepEqual(ran.filter((a) => a[0] === 'workbench.extensions.installExtension'), [['workbench.extensions.installExtension', 'zovo.table-viewer-vscode']]);
+  pickFn = async (items) => items.find((i) => i.product && !i.product.live);
+  await fake.commands.get('pdfViewer.moreViewers')();
+  assert.match(fake.opened[1], /^https:\/\/github\.com\/theluckystrike\//);
+});

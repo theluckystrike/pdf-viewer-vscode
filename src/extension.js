@@ -94,7 +94,7 @@ class PdfEditorProvider {
         if (panelDisposed) return;
         send({ type: 'load', data: toPlainBytes(data), reload });
       } catch (e) {
-        send({ type: 'error', message: e && e.message ? e.message : String(e) });
+        send({ type: 'error', message: e && e.message ? e.message : String(e), reload: !!reload });
       }
     };
 

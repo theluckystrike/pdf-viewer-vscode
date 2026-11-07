@@ -5,6 +5,8 @@
 
 A PDF viewer and PDF reader for VS Code. Read specs and papers next to your code on dark or sepia pages that keep photos in their real colors, and highlight the parts you want to find again.
 
+It reloads when the PDF changes on disk, after a LaTeX, Typst or report build, and keeps your page, zoom and scroll position. It does not take `Ctrl+P` (`Cmd+P` on macOS), so Quick Open works while a PDF is open. Its find, go-to-page and zoom keys apply only while the PDF tab is active.
+
 ![A PDF open in VS Code with dark pages. Three passages are highlighted in yellow, green and blue, and the Highlights tab on the left lists them with their page numbers](https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-highlights-dark.png)
 
 - Highlights: select text and pick one of 4 colors, or press `H`. The Highlights tab lists them, a click jumps back, and "Copy as Markdown" gives you a list with a link to each page for your notes. The PDF file is not changed.
@@ -71,7 +73,7 @@ The sidebar stays closed until you open it, also for LaTeX PDFs with bookmarks. 
 
 Pick Fit width, Fit page, or 50% to 400% from the toolbar. `Ctrl` plus the mouse wheel, `Ctrl+=` and `Ctrl+-` also zoom (`Cmd` on macOS). They zoom the PDF, not the VS Code window.
 
-Each PDF reopens at the page and zoom where you left it. When the file changes on disk, for example after a LaTeX build, the viewer reloads it and stays on the same page.
+Each PDF reopens at the page and zoom where you left it. When the file changes on disk, for example after a LaTeX build, the viewer reloads it and stays on the same page, at the same zoom and scroll position. If the build is still writing the file, the last version stays on screen until the new one can be read.
 
 ## Go to a page, and link to it from your notes
 

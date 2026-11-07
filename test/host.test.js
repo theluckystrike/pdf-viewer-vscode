@@ -237,6 +237,34 @@ test('extension: open, ready -> init + load, remember page, reload on change', a
   fp2.dispose();
 });
 
+test('extension: a re-read that fails after a change is flagged as a reload, so the webview keeps its pages (SQL2)', async () => {
+  const files = { '/docs/b.pdf': new Uint8Array([37, 80, 68, 70, 45]) };
+  const fake = makeVscode(files, {});
+  const ext = loadExtension(fake);
+  ext.activate(context());
+  const reg = fake.getProvider();
+  const uri = fake.vscode.Uri.file('/docs/b.pdf');
+  const fp = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(uri), fp.panel);
+  fp.receive({ type: 'ready' });
+  await tick();
+  assert.equal(fp.sent.filter((m) => m.type === 'load').length, 1);
+  delete files['/docs/b.pdf']; // a build tool removed the file for a moment
+  fake.watchers[0].onDidChange.fire(uri);
+  await tick(350);
+  const err = fp.sent.find((m) => m.type === 'error');
+  assert.ok(err, 'an error message is sent');
+  assert.equal(err.reload, true);
+  // a first open that fails is not a reload
+  const fp2 = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(uri), fp2.panel);
+  fp2.receive({ type: 'ready' });
+  await tick();
+  assert.equal(fp2.sent.find((m) => m.type === 'error').reload, false);
+  fp.dispose();
+  fp2.dispose();
+});
+
 test('extension: links open only for safe schemes', async () => {
   const fake = makeVscode({ '/a.pdf': new Uint8Array(1) }, {});
   const ext = loadExtension(fake);

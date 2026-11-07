@@ -37,6 +37,7 @@ const S = {
   thumbsObserver: null,
   thumbsRendered: new Set(),
   docId: 0,
+  reloadStash: null, // position from before a reload that opened a shorter (half-written) file
   hidden: false, // true while the VS Code tab is hidden; page canvases are freed then
 };
 
@@ -72,6 +73,8 @@ window.addEventListener('message', (ev) => {
       showTooLarge(m.size, m.limit);
       break;
     case 'error':
+      // A failed re-read after a change on disk keeps the pages on screen (the file may be mid-write).
+      if (m.reload && S.doc) { $('status').textContent = 'The file changed and could not be read. Showing the last version.'; break; }
       showError(new Error(String(m.message || 'Unknown error')));
       break;
     case 'config':
@@ -122,13 +125,19 @@ async function ensurePdfjs() {
 
 async function openDocument(data, isReload) {
   const lib = await ensurePdfjs();
-  hideMessage();
-  const keep = isReload && S.doc ? { page: S.page, zoom: S.zoom, scrollRatio: scrollRatioInPage() } : null;
-  if (S.loadingTask) { try { await S.loadingTask.destroy(); } catch { /* ignore */ } }
-  resetDocState();
+  // A reload over a document on screen opens the new file first. If that fails (a build tool is still
+  // writing it), the old pages stay, with a note in the status bar; the next change event tries again.
+  const over = isReload && !!S.doc;
+  const current = over ? { page: S.page, zoom: S.zoom, scrollRatio: scrollRatioInPage() } : null;
+  const keep = isReload ? C.reloadAnchor(current, S.reloadStash, Date.now()) : null;
+  if (!over) {
+    hideMessage();
+    if (S.loadingTask) { try { await S.loadingTask.destroy(); } catch { /* ignore */ } }
+    resetDocState();
+    $('status').textContent = 'Loading…';
+  }
   S.reportedRender = false;
   const myId = ++S.docId;
-  $('status').textContent = 'Loading…';
   const task = lib.getDocument({
     data: C.toBytes(data),
     cMapUrl: DATA.cmaps,
@@ -140,10 +149,29 @@ async function openDocument(data, isReload) {
     enableXfa: false,
     disableAutoFetch: true,
   });
-  S.loadingTask = task;
+  if (!over) S.loadingTask = task;
   task.onPassword = (update, reason) => askPassword(update, reason);
-  const doc = await task.promise;
-  if (myId !== S.docId) return;
+  let doc;
+  try {
+    doc = await task.promise;
+  } catch (e) {
+    if (myId !== S.docId) return;
+    if (over && S.doc) {
+      try { await task.destroy(); } catch { /* ignore */ }
+      $('status').textContent = 'The file changed and is not readable yet. Showing the last version.';
+      return;
+    }
+    throw e;
+  }
+  if (myId !== S.docId) { try { await task.destroy(); } catch { /* ignore */ } return; }
+  if (over) {
+    const old = S.loadingTask;
+    S.loadingTask = task;
+    hideMessage();
+    resetDocState();
+    if (old) old.destroy().catch(() => { /* ignore */ });
+  }
+  S.reloadStash = isReload ? C.reloadStash(keep, doc.numPages, Date.now()) : null;
   S.doc = doc;
   S.numPages = doc.numPages;
   $('pageCount').textContent = String(doc.numPages);

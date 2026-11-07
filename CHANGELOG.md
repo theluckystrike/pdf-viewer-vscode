@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.8 (2026-11-08)
+
+- A PDF that a build tool is still writing no longer flashes "This file is not a valid PDF". The last version stays on screen, with a note in the status bar, until the new file can be read. After the reload you are on the same page, at the same zoom and scroll position (before, the scroll position inside the page was lost).
+- If a reload opens a half-written file with fewer pages, the next reload goes back to the page you were on.
+- The README says what the viewer does when the PDF changes and which keys it uses.
+
 ## 0.2.7 (2026-11-08)
 
 - The "More free viewers" list and the README now use the current Marketplace names and include the newest Zovo extensions: ZIP, GCode, EPUB, HAR, font and audio viewers.

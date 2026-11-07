@@ -195,3 +195,27 @@ test('visibilityAction: free canvases when hidden, redraw when shown, nothing ot
   assert.equal(C.visibilityAction(true, true), null);
   assert.equal(C.visibilityAction(false, false), null);
 });
+
+test('reloadAnchor: keeps the position on screen, or a recent one from before a half-written file (SQL2)', () => {
+  const cur = { page: 7, zoom: 1.25, scrollRatio: 0.3 };
+  assert.deepEqual(C.reloadAnchor(cur, null, 1000), cur);
+  assert.equal(C.reloadAnchor(null, null, 1000), null);
+  // a partial file opened with 3 pages, so the view sits on page 3; the stash from before wins
+  const stash = { page: 7, zoom: 1.25, scrollRatio: 0.3, at: 1000 };
+  assert.deepEqual(C.reloadAnchor({ page: 3, zoom: 1.25, scrollRatio: 0 }, stash, 5000), { page: 7, zoom: 1.25, scrollRatio: 0.3 });
+  // too old: the user has been reading the short file for a while
+  assert.deepEqual(C.reloadAnchor({ page: 3, zoom: 1, scrollRatio: 0 }, stash, 1000 + C.RELOAD_STASH_MS + 1), { page: 3, zoom: 1, scrollRatio: 0 });
+  // the user moved further than the stash: theirs wins
+  assert.deepEqual(C.reloadAnchor({ page: 9, zoom: 1, scrollRatio: 0.1 }, stash, 2000), { page: 9, zoom: 1, scrollRatio: 0.1 });
+  // no document on screen (the last reload failed): the stash still applies
+  assert.deepEqual(C.reloadAnchor(null, stash, 2000), { page: 7, zoom: 1.25, scrollRatio: 0.3 });
+});
+
+test('reloadStash: kept only when the new file is too short to show the position (SQL2)', () => {
+  const a = { page: 7, zoom: 'page-width', scrollRatio: 0.5 };
+  assert.equal(C.reloadStash(a, 24, 10), null);
+  assert.equal(C.reloadStash(a, 7, 10), null);
+  assert.deepEqual(C.reloadStash(a, 3, 10), { page: 7, zoom: 'page-width', scrollRatio: 0.5, at: 10 });
+  assert.equal(C.reloadStash(null, 3, 10), null);
+  assert.equal(C.reloadStash({ page: 'x' }, 3, 10), null);
+});

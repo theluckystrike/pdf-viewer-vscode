@@ -412,11 +412,30 @@
     return null;
   }
 
+  // ---------- reload while a build tool writes the file ----------
+  // LaTeX, Typst and report builds write a PDF in steps, so the watcher can see an empty or half-written file.
+  // A reload that lands on such a file can open with fewer pages; the position from before it is kept for a
+  // short time so the reload after the last write goes back to it.
+  const RELOAD_STASH_MS = 30000;
+  /** The position a reload should go back to: the one on screen, or a recent one from before a shorter (partial) file. */
+  function reloadAnchor(current, stash, now) {
+    if (stash && now - stash.at <= RELOAD_STASH_MS && (!current || stash.page > current.page)) {
+      return { page: stash.page, zoom: stash.zoom, scrollRatio: stash.scrollRatio };
+    }
+    return current || null;
+  }
+  /** What to keep for the next reload: the anchor when the new file has too few pages to show it, else nothing. */
+  function reloadStash(anchor, numPages, now) {
+    if (!anchor || !Number.isInteger(anchor.page) || anchor.page <= numPages) return null;
+    return { page: anchor.page, zoom: anchor.zoom, scrollRatio: anchor.scrollRatio, at: now };
+  }
+
   return {
     multiply, applyPoint, bboxOf, imageRects, toCanvasRects,
     computeScale, clampScale, nextZoom, parseZoom, ZOOM_STEPS, MIN_SCALE, MAX_SCALE,
     fold, buildPageText, rangeToItems, findInPage, segments,
     flattenOutline, resolveDest, isSafeExternalUrl, isDark, visiblePages, currentPage, toBytes, visibilityAction,
     selectionRects, cleanSelectionText, pageMode, pageTint, SEPIA_PAPER,
+    reloadAnchor, reloadStash, RELOAD_STASH_MS,
   };
 });

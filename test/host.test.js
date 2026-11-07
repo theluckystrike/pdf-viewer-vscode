@@ -458,7 +458,7 @@ test('support: the footer shows by default and pdfViewer.showSupportLinks=false 
   }
 });
 
-test('support: Sponsor opens GitHub Sponsors, More free viewers installs only the picked extension', async () => {
+test('support: Sponsor opens GitHub Sponsors, More free viewers opens the picked extension and installs nothing', async () => {
   const fake = makeVscode({}, {});
   const ran = [];
   fake.vscode.commands.executeCommand = async (...a) => { ran.push(a); };
@@ -473,7 +473,8 @@ test('support: Sponsor opens GitHub Sponsors, More free viewers installs only th
   assert.equal(ran.filter((a) => a[0] === 'workbench.extensions.installExtension').length, 0);
   pickFn = async (items) => items.find((i) => i.product && i.product.id === 'zovo.table-viewer-vscode');
   await fake.commands.get('pdfViewer.moreViewers')();
-  assert.deepEqual(ran.filter((a) => a[0] === 'workbench.extensions.installExtension'), [['workbench.extensions.installExtension', 'zovo.table-viewer-vscode']]);
+  assert.deepEqual(ran.filter((a) => a[0] === 'extension.open'), [['extension.open', 'zovo.table-viewer-vscode']]);
+  assert.equal(ran.filter((a) => a[0] === 'workbench.extensions.installExtension').length, 0);
   pickFn = async (items) => items.find((i) => i.product && !i.product.live);
   await fake.commands.get('pdfViewer.moreViewers')();
   assert.match(fake.opened[1], /^https:\/\/github\.com\/theluckystrike\//);

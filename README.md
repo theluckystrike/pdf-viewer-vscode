@@ -110,7 +110,7 @@ The viewer leaves other VS Code keys alone. `Ctrl+P` opens Quick Open and `Ctrl+
 | `pdfViewer.rememberLastPage` | `true` | Reopen each PDF at the last page and zoom (up to 500 files) |
 | `pdfViewer.sidebar` | `closed` | `closed` keeps the sidebar closed, `open` opens it for every PDF, `remember` keeps your last choice |
 | `pdfViewer.maxFileSizeMB` | `200` | Ask before opening larger PDFs |
-| `pdfViewer.askForRating` | `true` | Ask one time for a Marketplace rating, after 5 files and 2 days. Turn it off with `false` |
+| `pdfViewer.askForRating` | `true` | Ask for a Marketplace rating after 3 files opened without an error on 2 different days. "Later" asks one more time after 7 days, "No thanks" never again. It never asks after an error. Turn it off with `false`. |
 
 ## More screenshots
 

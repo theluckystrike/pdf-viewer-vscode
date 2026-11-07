@@ -5,6 +5,7 @@
 - A PDF that a build tool is still writing no longer flashes "This file is not a valid PDF". The last version stays on screen, with a note in the status bar, until the new file can be read. After the reload you are on the same page, at the same zoom and scroll position (before, the scroll position inside the page was lost).
 - If a reload opens a half-written file with fewer pages, the next reload goes back to the page you were on.
 - The README says what the viewer does when the PDF changes and which keys it uses.
+- The rating question now comes after 3 files that opened without an error on 2 different days, and never after an error. "Later" asks one more time after 7 days, "No thanks" ends it, and it never asks more than 2 times. `pdfViewer.askForRating: false` turns it off.
 
 ## 0.2.7 (2026-11-08)
 

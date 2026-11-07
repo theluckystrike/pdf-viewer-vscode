@@ -9,7 +9,7 @@ const { watchGlob, isSameFile } = require('./watch');
 const { createRatingPrompt } = require('./rate');
 const { registerSupport, commandUris, showLinks } = require('./support');
 
-let rating = { success() {} };
+let rating = { success() {}, failure() {} };
 
 const VIEW_TYPE = 'pdfViewer.preview';
 const CONFIG = 'pdfViewer';
@@ -94,6 +94,7 @@ class PdfEditorProvider {
         if (panelDisposed) return;
         send({ type: 'load', data: toPlainBytes(data), reload });
       } catch (e) {
+        rating.failure();
         send({ type: 'error', message: e && e.message ? e.message : String(e), reload: !!reload });
       }
     };
@@ -129,6 +130,7 @@ class PdfEditorProvider {
         syncVisibility();
       } else if (m.type === 'error') {
         entry.lastError = m.message;
+        rating.failure();
       } else if (m.type === 'info') {
         entry.pages = m.pages;
         if (!entry.counted) { entry.counted = true; rating.success(); }
@@ -258,7 +260,7 @@ class PdfEditorProvider {
 }
 
 function activate(context) {
-  rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pdf-viewer-dark', section: 'pdfViewer', message: (n) => `PDF Viewer has opened ${n} files for you. A rating helps other people find it.` });
+  rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pdf-viewer-dark', section: 'pdfViewer', name: 'PDF Viewer' });
   registerSupport({ vscode, context, prefix: 'pdfViewer', selfId: 'zovo.pdf-viewer-dark' });
   const provider = new PdfEditorProvider(context);
   context.subscriptions.push(

@@ -348,10 +348,75 @@
     return null;
   }
 
+  // ---------- highlights and page colors ----------
+  /**
+   * Turns the client rectangles of a text selection into rectangles on one page, as fractions of the
+   * page box (0..1), so a highlight stays in place at every zoom. Rectangles outside the page, empty ones
+   * and very tall ones (the text layer's end-of-content filler) are left out. Rectangles on the same
+   * line that touch or overlap are merged. Returns [[x, y, w, h], ...] rounded to 5 decimals.
+   */
+  function selectionRects(clientRects, pageBox, maxRects) {
+    const limit = maxRects || 200;
+    const W = pageBox.width;
+    const H = pageBox.height;
+    if (!(W > 0) || !(H > 0)) return [];
+    const rs = [];
+    for (const r of clientRects || []) {
+      if (!r || !(r.width > 1) || !(r.height > 1)) continue;
+      if (r.height > H * 0.2) continue;
+      const x0 = Math.max(r.left, pageBox.left);
+      const y0 = Math.max(r.top, pageBox.top);
+      const x1 = Math.min(r.left + r.width, pageBox.left + W);
+      const y1 = Math.min(r.top + r.height, pageBox.top + H);
+      if (x1 - x0 < 1 || y1 - y0 < 1) continue;
+      rs.push({ x0, y0, x1, y1 });
+    }
+    rs.sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0);
+    const merged = [];
+    for (const r of rs) {
+      const m = merged.find((q) => {
+        const h = Math.min(q.y1 - q.y0, r.y1 - r.y0);
+        const overlapY = Math.min(q.y1, r.y1) - Math.max(q.y0, r.y0);
+        return overlapY > h * 0.6 && r.x0 <= q.x1 + h * 0.6 && r.x1 >= q.x0 - h * 0.6;
+      });
+      if (m) { m.x0 = Math.min(m.x0, r.x0); m.y0 = Math.min(m.y0, r.y0); m.x1 = Math.max(m.x1, r.x1); m.y1 = Math.max(m.y1, r.y1); }
+      else merged.push(Object.assign({}, r));
+      if (merged.length >= limit) break;
+    }
+    const f = (n) => Math.round(n * 1e5) / 1e5;
+    return merged.map((r) => [f((r.x0 - pageBox.left) / W), f((r.y0 - pageBox.top) / H), f((r.x1 - r.x0) / W), f((r.y1 - r.y0) / H)]);
+  }
+
+  /** Collapses white space and cuts the selected text to at most max characters. */
+  function cleanSelectionText(s, max) {
+    const t = String(s == null ? '' : s).replace(/­/g, '').replace(/-\s*\n\s*/g, '').replace(/\s+/g, ' ').trim();
+    const n = max || 2000;
+    return t.length > n ? t.slice(0, n - 1) + '…' : t;
+  }
+
+  /** Page look: 'dark' wins over 'sepia'; anything else is the page as printed. */
+  function pageMode(dark, sepia) {
+    return dark ? 'dark' : sepia ? 'sepia' : 'light';
+  }
+
+  /** Warm paper color. Sepia pages multiply the rendered page by it: white becomes this, black stays black. */
+  const SEPIA_PAPER = '#f4ecd8';
+
+  /**
+   * How a page mode changes the rendered canvas: { filter } (a canvas filter, for dark) or
+   * { multiply } (a color to multiply with, for sepia), or null when the canvas stays as rendered.
+   */
+  function pageTint(mode) {
+    if (mode === 'dark') return { filter: 'invert(0.88) hue-rotate(180deg)' };
+    if (mode === 'sepia') return { multiply: SEPIA_PAPER };
+    return null;
+  }
+
   return {
     multiply, applyPoint, bboxOf, imageRects, toCanvasRects,
     computeScale, clampScale, nextZoom, parseZoom, ZOOM_STEPS, MIN_SCALE, MAX_SCALE,
     fold, buildPageText, rangeToItems, findInPage, segments,
     flattenOutline, resolveDest, isSafeExternalUrl, isDark, visiblePages, currentPage, toBytes, visibilityAction,
+    selectionRects, cleanSelectionText, pageMode, pageTint, SEPIA_PAPER,
   };
 });

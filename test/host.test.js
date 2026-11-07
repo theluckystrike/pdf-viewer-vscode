@@ -30,7 +30,9 @@ test('protocol: rejects unknown, malformed and dangerous messages', () => {
 
 test('protocol: readConfig normalises settings', () => {
   const cfg = (o) => readConfig((k, d) => (k in o ? o[k] : d));
-  assert.deepEqual(cfg({}), { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width', rememberPage: true, maxFileSizeBytes: 200 * 1048576, sidebar: 'closed' });
+  assert.deepEqual(cfg({}), { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width', rememberPage: true, maxFileSizeBytes: 200 * 1048576, sidebar: 'closed', lightPages: 'white' });
+  assert.equal(cfg({ lightPages: 'sepia' }).lightPages, 'sepia');
+  assert.equal(cfg({ lightPages: 'purple' }).lightPages, 'white');
   assert.equal(cfg({ sidebar: 'open' }).sidebar, 'open');
   assert.equal(cfg({ sidebar: 'remember' }).sidebar, 'remember');
   assert.equal(cfg({ sidebar: 'sometimes' }).sidebar, 'closed');
@@ -645,4 +647,64 @@ test('webview: uses the link target on first load only and reports sidebar toggl
   assert.match(src, /case 'goTo':/);
   assert.match(src, /post\(\{ type: 'sidebar', open: !sb\.hidden \}\)/);
   assert.match(src, /if \(st && typeof st\.sidebar === 'boolean'\) return;/, 'a restored view keeps its own sidebar state');
+});
+
+// ---------- RK6: highlights through the host ----------
+test('extension: highlights are stored per file, sent on open, synced to other views and copied as Markdown', async () => {
+  const fake = makeVscode({ '/ws/docs/p.pdf': new Uint8Array(1) }, {});
+  const ext = loadExtension(fake);
+  const ctx = context();
+  ext.activate(ctx);
+  const reg = fake.getProvider();
+  const uri = fake.vscode.Uri.file('/ws/docs/p.pdf');
+  const a = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(uri), a.panel);
+  a.receive({ type: 'ready' });
+  await tick();
+  assert.deepEqual(a.sent[0].highlights, []);
+  const b = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(uri.with({ fragment: 'page=3' })), b.panel);
+  b.receive({ type: 'ready' });
+  await tick();
+  const h = { id: 'k1', page: 3, rects: [[0.1, 0.2, 0.3, 0.02]], text: 'Results', color: 'green', created: 5 };
+  a.receive({ type: 'highlights', items: [h, { id: 'bad id', page: 1 }] });
+  await tick();
+  assert.deepEqual(b.sent.filter((m) => m.type === 'highlights').pop().items, [h]);
+  assert.equal(a.sent.filter((m) => m.type === 'highlights').length, 0); // the sender is not echoed
+  a.panel.active = true;
+  a.setView(true, true);
+  a.receive({ type: 'copyHighlights' });
+  await tick();
+  assert.equal(fake.clipboard.text, '## Highlights in p.pdf\n\n- "Results" ([page 3](/docs/p.pdf#page=3))\n');
+  fake.clipboard.text = '';
+  await fake.commands.get('pdfViewer.copyHighlights')();
+  assert.match(fake.clipboard.text, /Results/);
+  // reopening the file sends the stored highlights
+  const c = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(uri), c.panel);
+  c.receive({ type: 'ready' });
+  await tick();
+  assert.deepEqual(c.sent[0].highlights, [h]);
+  for (const id of ['pdfViewer.toggleSepia', 'pdfViewer.highlightSelection', 'pdfViewer.showHighlights']) assert.ok(fake.commands.has(id), id);
+  c.panel.active = true;
+  c.setView(true, true);
+  await fake.commands.get('pdfViewer.toggleSepia')();
+  assert.deepEqual(c.sent.pop(), { type: 'command', name: 'toggleSepia' });
+  a.dispose(); b.dispose(); c.dispose();
+});
+
+test('extension: Copy Highlights with none says how to make one and copies nothing', async () => {
+  const fake = makeVscode({ '/ws/q.pdf': new Uint8Array(1) }, {});
+  const infos = [];
+  fake.vscode.window.showInformationMessage = async (t) => { infos.push(t); };
+  const ext = loadExtension(fake);
+  ext.activate(context());
+  const reg = fake.getProvider();
+  const p = fakePanel();
+  await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/ws/q.pdf')), p.panel);
+  p.receive({ type: 'ready' });
+  await tick();
+  assert.equal(await fake.commands.get('pdfViewer.copyHighlights')(), '');
+  assert.equal(fake.clipboard.text, '');
+  assert.match(infos.pop(), /no highlights yet/);
 });

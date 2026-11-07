@@ -1,8 +1,8 @@
 {
   "name": "pdf-viewer-dark",
-  "displayName": "PDF Viewer & PDF Reader with Dark Mode",
-  "description": "PDF viewer and PDF reader for VS Code with a real dark mode that keeps photos in their true colors, plus search, an outline, thumbnails and zoom, all offline.",
-  "version": "0.2.4",
+  "displayName": "PDF Viewer & PDF Reader",
+  "description": "PDF viewer and PDF reader for VS Code: dark or sepia pages that keep photos in their true colors, highlights you can copy as Markdown, search, outline and thumbnails, all offline.",
+  "version": "0.2.5",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -19,16 +19,21 @@
     "Other"
   ],
   "keywords": [
-    "pdf reader",
     "pdf viewer",
+    "pdf reader",
     "pdf",
-    "pdf dark mode",
-    "view pdf",
     "pdf preview",
+    "pdf dark mode",
+    "dark pdf",
+    "view pdf",
     "read pdf",
     "open pdf",
+    "pdf highlight",
+    "highlight pdf",
+    "highlights",
+    "sepia",
+    "reading mode",
     "dark mode",
-    "dark pdf",
     "night mode",
     "latex preview",
     "latex",
@@ -40,14 +45,9 @@
     "thumbnails",
     "zoom",
     "pdf.js",
-    "pdfjs",
-    "document",
-    "viewer",
-    "reader",
-    "preview",
     "paper",
     "arxiv",
-    "ebook",
+    "markdown links",
     "offline"
   ],
   "main": "./src/extension.js",
@@ -77,6 +77,11 @@
         "title": "Toggle Dark Pages",
         "category": "PDF",
         "icon": "$(color-mode)"
+      },
+      {
+        "command": "pdfViewer.toggleSepia",
+        "title": "Toggle Sepia Pages",
+        "category": "PDF"
       },
       {
         "command": "pdfViewer.find",
@@ -116,6 +121,21 @@
       {
         "command": "pdfViewer.copyPageLink",
         "title": "Copy Link to This Page",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.highlightSelection",
+        "title": "Highlight Selected Text",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.showHighlights",
+        "title": "Show Highlights",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.copyHighlights",
+        "title": "Copy Highlights as Markdown",
         "category": "PDF"
       },
       {
@@ -190,6 +210,22 @@
         {
           "command": "pdfViewer.copyPageLink",
           "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.toggleSepia",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.highlightSelection",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.showHighlights",
+          "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.copyHighlights",
+          "when": "activeCustomEditorId == pdfViewer.preview"
         }
       ]
     },
@@ -214,7 +250,20 @@
         "pdfViewer.keepImagesInDarkMode": {
           "type": "boolean",
           "default": true,
-          "description": "In dark mode, keep photos and other raster images in their original colors. Text, lines and backgrounds are still darkened."
+          "description": "In dark and sepia pages, keep photos and other raster images in their original colors. Text, lines and backgrounds still change color."
+        },
+        "pdfViewer.lightPages": {
+          "type": "string",
+          "enum": [
+            "white",
+            "sepia"
+          ],
+          "enumDescriptions": [
+            "Show light pages as printed.",
+            "Show light pages in warm sepia paper colors, which are softer on the eyes than white. Photos keep their colors."
+          ],
+          "default": "white",
+          "description": "Color of the pages when dark pages are off. The sepia button in the toolbar switches it for the open file."
         },
         "pdfViewer.defaultZoom": {
           "type": "string",

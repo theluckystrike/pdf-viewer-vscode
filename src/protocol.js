@@ -35,6 +35,13 @@ function parseWebviewMessage(m) {
       return { type: 'error', message: String(m.message == null ? '' : m.message).slice(0, 500) };
     case 'sidebar':
       return typeof m.open === 'boolean' ? { type: 'sidebar', open: m.open } : null;
+    case 'highlights': {
+      // Lazy require: highlights.js uses markdownPageLink from this file.
+      if (!Array.isArray(m.items) || m.items.length > 5000) return null;
+      return { type: 'highlights', items: require('./highlights').sanitizeHighlights(m.items) };
+    }
+    case 'copyHighlights':
+      return { type: 'copyHighlights' };
     default:
       return null;
   }
@@ -46,6 +53,7 @@ function readConfig(get) {
   const zoom = get('defaultZoom', 'page-width');
   const max = Number(get('maxFileSizeMB', 200));
   const sidebar = get('sidebar', 'closed');
+  const light = get('lightPages', 'white');
   return {
     darkMode: mode === 'on' || mode === 'off' ? mode : 'auto',
     keepImagesInDarkMode: get('keepImagesInDarkMode', true) !== false,
@@ -53,6 +61,7 @@ function readConfig(get) {
     rememberPage: get('rememberLastPage', true) !== false,
     maxFileSizeBytes: Math.round((isFinite(max) && max > 0 ? max : 200) * 1024 * 1024),
     sidebar: sidebar === 'open' || sidebar === 'remember' ? sidebar : 'closed',
+    lightPages: light === 'sepia' ? 'sepia' : 'white',
   };
 }
 

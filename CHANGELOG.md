@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.5 (2026-11-07)
+
+- Highlights. Select text in a PDF and pick yellow, green, blue or pink from the bar under the selection, or press `H`. A new Highlights tab in the sidebar lists them by page. A click jumps to one, × removes it. They are saved in VS Code for each file, and the PDF file is not changed.
+- "Copy as Markdown" in the Highlights tab, and "PDF: Copy Highlights as Markdown" in the Command Palette, copy the highlights as a Markdown list with a link to each page.
+- Sepia pages. The new paper button in the toolbar, or "PDF: Toggle Sepia Pages", shows light pages in warm paper colors. Photos keep their colors. The new setting `pdfViewer.lightPages` (`white` or `sepia`) picks the default.
+- The Marketplace name is now "PDF Viewer & PDF Reader". The extension ID, settings and commands stay the same.
+
 ## 0.2.4 (2026-11-07)
 
 - "More free viewers" now starts with the Zovo extensions most related to this one. Picking one opens its Marketplace page, where you choose to install it.

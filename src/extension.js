@@ -4,6 +4,7 @@ const path = require('path');
 const { buildHtml } = require('./html');
 const { parseWebviewMessage, readConfig, parsePdfFragment, markdownPageLink } = require('./protocol');
 const { StateStore } = require('./stateStore');
+const { HighlightStore, highlightsToMarkdown } = require('./highlights');
 const { watchGlob, isSameFile } = require('./watch');
 const { createRatingPrompt } = require('./rate');
 const { registerSupport, commandUris, showLinks } = require('./support');
@@ -41,6 +42,7 @@ class PdfEditorProvider {
   constructor(context) {
     this.context = context;
     this.store = new StateStore(context.globalState);
+    this.highlights = new HighlightStore(context.globalState);
     this.panels = new Set();
     this.active = null;
   }
@@ -120,6 +122,7 @@ class PdfEditorProvider {
           target,
           sidebarOpen: this.sidebarDefault(cfg),
           fileName: path.basename(document.uri.path),
+          highlights: this.highlights.get(key),
         });
         target = null; // a webview reload (hidden tab, window reload) keeps its own position
         load(false);
@@ -140,6 +143,10 @@ class PdfEditorProvider {
       } else if (m.type === 'sidebar') {
         entry.sidebarOpen = m.open;
         if (this.config().sidebar === 'remember') this.context.globalState.update(SIDEBAR_KEY, m.open);
+      } else if (m.type === 'highlights') {
+        this.highlights.set(key, m.items).then(() => this.syncHighlights(entry, key, m.items));
+      } else if (m.type === 'copyHighlights') {
+        this.copyHighlights(entry);
       } else if (m.type === 'openExternal') {
         // Only after a user click on a link inside the PDF, and only http, https and mailto (checked in protocol.js).
         vscode.env.openExternal(vscode.Uri.parse(m.url, true));
@@ -183,6 +190,35 @@ class PdfEditorProvider {
     if (cfg.sidebar === 'open') return true;
     if (cfg.sidebar === 'remember') return this.context.globalState.get(SIDEBAR_KEY) === true;
     return false;
+  }
+
+  /** Other open views of the same file show the same highlights. */
+  syncHighlights(from, key, items) {
+    for (const e of this.panels) {
+      if (e !== from && e.ready && fileKey(e.uri) === key) e.panel.webview.postMessage({ type: 'highlights', items });
+    }
+  }
+
+  fileInfo(entry) {
+    const uri = entry.uri.fragment && typeof entry.uri.with === 'function' ? entry.uri.with({ fragment: '' }) : entry.uri;
+    const folder = vscode.workspace.getWorkspaceFolder ? vscode.workspace.getWorkspaceFolder(uri) : undefined;
+    const relPath = folder ? path.posix.relative(folder.uri.path, uri.path) : null;
+    return { fileName: path.posix.basename(uri.path), relPath, fileUri: uri.toString() };
+  }
+
+  /** Copies the highlights of a PDF as a Markdown list with a link to each page. */
+  async copyHighlights(entry) {
+    entry = entry || this.active;
+    if (!entry) return;
+    const items = this.highlights.get(fileKey(entry.uri));
+    if (!items.length) {
+      vscode.window.showInformationMessage('This PDF has no highlights yet. Select text in the PDF and click Highlight, or press H.');
+      return '';
+    }
+    const md = highlightsToMarkdown(this.fileInfo(entry), items);
+    await vscode.env.clipboard.writeText(md);
+    vscode.window.showInformationMessage(`Copied ${items.length} highlight${items.length === 1 ? '' : 's'} as Markdown. Each one links to its page.`);
+    return md;
   }
 
   sendCommand(name) {
@@ -239,12 +275,16 @@ function activate(context) {
     'pdfViewer.fitWidth': 'fitWidth',
     'pdfViewer.fitPage': 'fitPage',
     'pdfViewer.toggleSidebar': 'toggleSidebar',
+    'pdfViewer.toggleSepia': 'toggleSepia',
+    'pdfViewer.highlightSelection': 'highlight',
+    'pdfViewer.showHighlights': 'showHighlights',
   };
   for (const [id, name] of Object.entries(cmds)) {
     context.subscriptions.push(vscode.commands.registerCommand(id, () => provider.sendCommand(name)));
   }
   context.subscriptions.push(vscode.commands.registerCommand('pdfViewer.goToPage', () => provider.goToPage()));
   context.subscriptions.push(vscode.commands.registerCommand('pdfViewer.copyPageLink', () => provider.copyPageLink()));
+  context.subscriptions.push(vscode.commands.registerCommand('pdfViewer.copyHighlights', () => provider.copyHighlights()));
   context.subscriptions.push(vscode.commands.registerCommand('pdfViewer.forgetPositions', async () => {
     await provider.store.clear();
     vscode.window.showInformationMessage('PDF Viewer: forgot the last page of every PDF.');

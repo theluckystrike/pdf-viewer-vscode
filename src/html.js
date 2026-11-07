@@ -77,6 +77,7 @@ ${footer ? `<style nonce="${N}">${FOOTER_CSS}</style>` : ''}
   <span class="spacer"></span>
   <span id="status" aria-live="polite"></span>
   <span id="fileName"></span>
+  <button class="tb" id="sepiaBtn" title="Sepia pages: off (click for warm paper colors)" aria-pressed="false" aria-label="Sepia pages"><svg viewBox="0 0 16 16"><path d="M3 1.5h7l3 3v10H3v-13zm1 1v11h8V5h-2.5V2.5H4zm1.5 4h5v1h-5v-1zm0 2h5v1h-5v-1zm0 2h3.5v1H5.5v-1z"/></svg></button>
   <button class="tb" id="darkBtn" title="Dark pages" aria-pressed="false" aria-label="Dark pages"><svg viewBox="0 0 16 16"><path d="M6 1.5a6.5 6.5 0 1 0 8.5 8.5A5.5 5.5 0 0 1 6 1.5z"/></svg></button>
 </div>
 <div id="main">
@@ -84,11 +85,22 @@ ${footer ? `<style nonce="${N}">${FOOTER_CSS}</style>` : ''}
     <div class="tabs" role="tablist">
       <button id="tab-outline" role="tab" aria-selected="true">Outline</button>
       <button id="tab-thumbs" role="tab" aria-selected="false">Pages</button>
+      <button id="tab-hls" role="tab" aria-selected="false">Highlights</button>
     </div>
     <div id="outline" class="active" role="tree" aria-label="Outline"></div>
     <div id="thumbs" hidden aria-label="Page thumbnails"></div>
+    <div id="hls" hidden aria-label="Highlights">
+      <div class="hlHead"><span id="hlCount">0 highlights</span><button id="hlCopy" class="linkBtn" title="Copy all highlights as a Markdown list with a link to each page">Copy as Markdown</button></div>
+      <ul id="hlList"></ul>
+    </div>
   </aside>
   <div id="viewer" tabindex="0"><div id="pages"></div></div>
+</div>
+<div id="hlPop" hidden role="toolbar" aria-label="Highlight">
+  <button class="hlSwatch" data-color="yellow" title="Highlight yellow (H)" aria-label="Highlight yellow"></button>
+  <button class="hlSwatch" data-color="green" title="Highlight green" aria-label="Highlight green"></button>
+  <button class="hlSwatch" data-color="blue" title="Highlight blue" aria-label="Highlight blue"></button>
+  <button class="hlSwatch" data-color="pink" title="Highlight pink" aria-label="Highlight pink"></button>
 </div>
 <div id="message" hidden role="alert"></div>
 ${footer}

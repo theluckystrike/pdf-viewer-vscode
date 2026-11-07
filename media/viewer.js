@@ -13,7 +13,7 @@ let pdfjsLib = null;
 let workerPort = null;
 
 const S = {
-  config: { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width', searchCaseSensitive: false },
+  config: { darkMode: 'auto', keepImagesInDarkMode: true, defaultZoom: 'page-width', searchCaseSensitive: false, lightPages: 'white' },
   doc: null,
   loadingTask: null,
   numPages: 0,
@@ -28,6 +28,8 @@ const S = {
   target: null, // { page, dest, zoom } from a link such as report.pdf#page=4, used on the first load only
   sidebarDefault: null, // from the pdfViewer.sidebar setting, used when this view has no saved sidebar state
   darkOverride: null, // null = follow config, true/false = toggled by the user in this view
+  sepiaOverride: null, // same for sepia pages
+  highlights: [], // [{id, page, rects: [[x, y, w, h] as page fractions], text, color, created}]
   rendered: new Map(), // pageIndex -> {scale, dark, task}
   textCache: new Map(), // pageIndex -> textContent items
   imageRectCache: new Map(),
@@ -59,6 +61,7 @@ window.addEventListener('message', (ev) => {
       if (m.state && !S.pendingRestore) S.pendingRestore = m.state;
       if (m.target && typeof m.target === 'object') S.target = m.target;
       if (typeof m.sidebarOpen === 'boolean') applySidebarDefault(m.sidebarOpen);
+      if (Array.isArray(m.highlights)) setHighlights(m.highlights);
       $('fileName').textContent = typeof m.fileName === 'string' ? m.fileName : '';
       applyDarkClass();
       break;
@@ -81,6 +84,9 @@ window.addEventListener('message', (ev) => {
     case 'visibility':
       setVisible(m.visible !== false);
       break;
+    case 'highlights':
+      if (Array.isArray(m.items)) setHighlights(m.items);
+      break;
     case 'goTo':
       if (Number.isInteger(m.page) && S.numPages) { scrollToPage(m.page); saveState(); $('viewer').focus(); }
       break;
@@ -95,6 +101,9 @@ function runCommand(name) {
   else if (name === 'fitWidth') setZoom('page-width');
   else if (name === 'fitPage') setZoom('page-fit');
   else if (name === 'toggleSidebar') toggleSidebar();
+  else if (name === 'toggleSepia') toggleSepia();
+  else if (name === 'highlight') highlightSelection('yellow');
+  else if (name === 'showHighlights') { toggleSidebar(true); showTab('hls', true); }
 }
 
 // ---------- pdf.js setup ----------
@@ -213,10 +222,14 @@ function buildPages() {
     label.className = 'pageLabel';
     label.textContent = String(i + 1);
     el.appendChild(label);
+    const hl = document.createElement('div');
+    hl.className = 'hlLayer';
+    el.appendChild(hl);
     frag.appendChild(el);
     S.pageEls.push(el);
   }
   $('pages').replaceChildren(frag);
+  paintAllHighlights();
 }
 
 function containerSize() {
@@ -307,9 +320,18 @@ function themeKindFromClass() {
   if (cl.contains('vscode-dark')) return 'vscode-dark';
   return 'vscode-light';
 }
+function isSepiaNow() {
+  if (S.sepiaOverride != null) return S.sepiaOverride;
+  return S.config.lightPages === 'sepia';
+}
+function pageModeNow() { return C.pageMode(isDarkNow(), isSepiaNow()); }
 function applyDarkClass() {
   const dark = isDarkNow();
+  const sepia = !dark && isSepiaNow();
   document.body.classList.toggle('pdf-dark', dark);
+  document.body.classList.toggle('pdf-sepia', sepia);
+  $('sepiaBtn').setAttribute('aria-pressed', sepia ? 'true' : 'false');
+  $('sepiaBtn').title = sepia ? 'Sepia pages: on (click for white pages)' : 'Sepia pages: off (click for warm paper colors)';
   $('darkBtn').setAttribute('aria-pressed', dark ? 'true' : 'false');
   $('darkBtn').title = dark ? 'Dark pages: on (click for light pages)' : 'Dark pages: off (click for dark pages)';
 }
@@ -323,6 +345,12 @@ function onDarkChanged() {
 }
 function toggleDark() {
   S.darkOverride = !isDarkNow();
+  onDarkChanged();
+}
+function toggleSepia() {
+  const on = !(isSepiaNow() && !isDarkNow());
+  S.sepiaOverride = on;
+  if (on && isDarkNow()) S.darkOverride = false;
   onDarkChanged();
 }
 
@@ -379,11 +407,11 @@ async function pageImageRects(page, i) {
   return rects;
 }
 
-/** Inverts a rendered page, then paints the original pixels back over raster images. */
-function darkenCanvas(canvas, rects) {
+/** Inverts (dark) or tints (sepia) a rendered page, then paints the original pixels back over raster images. */
+function tintCanvas(canvas, rects, tint) {
   const w = canvas.width;
   const h = canvas.height;
-  if (!w || !h) return;
+  if (!w || !h || !tint) return;
   const copy = document.createElement('canvas');
   copy.width = w;
   copy.height = h;
@@ -391,10 +419,16 @@ function darkenCanvas(canvas, rects) {
   const ctx = canvas.getContext('2d');
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalCompositeOperation = 'copy';
-  ctx.filter = 'invert(0.88) hue-rotate(180deg)';
-  ctx.drawImage(copy, 0, 0);
-  ctx.filter = 'none';
+  if (tint.filter) {
+    ctx.globalCompositeOperation = 'copy';
+    ctx.filter = tint.filter;
+    ctx.drawImage(copy, 0, 0);
+    ctx.filter = 'none';
+  } else if (tint.multiply) {
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = tint.multiply;
+    ctx.fillRect(0, 0, w, h);
+  }
   ctx.globalCompositeOperation = 'source-over';
   for (const r of rects) ctx.drawImage(copy, r.x, r.y, r.w, r.h, r.x, r.y, r.w, r.h);
   ctx.restore();
@@ -419,6 +453,7 @@ async function renderPage(i) {
   const docId = S.docId;
   const scale = S.scale;
   const dark = isDarkNow();
+  const mode = pageModeNow();
   const prev = S.rendered.get(i);
   if (prev && prev.task && prev.task.cancel) prev.task.cancel();
   const entry = { scale, dark, task: null, stale: false };
@@ -431,10 +466,10 @@ async function renderPage(i) {
   entry.task = task;
   await task.promise;
   if (docId !== S.docId || S.rendered.get(i) !== entry) { canvas.width = 0; return; }
-  if (dark) {
+  if (mode !== 'light') {
     const rects = S.config.keepImagesInDarkMode ? await pageImageRects(page, i) : [];
     const tf = C.multiply([os, 0, 0, os, 0, 0], vp.transform);
-    darkenCanvas(canvas, C.toCanvasRects(rects, tf, canvas.width, canvas.height));
+    tintCanvas(canvas, C.toCanvasRects(rects, tf, canvas.width, canvas.height), C.pageTint(mode));
   }
   const wrap = document.createElement('div');
   wrap.className = 'canvasWrap';
@@ -742,13 +777,14 @@ async function renderThumb(i) {
   const page = await S.doc.getPage(i + 1);
   const scale = 110 / page.getViewport({ scale: 1 }).width;
   const dark = isDarkNow();
+  const mode = pageModeNow();
   const canvas = document.createElement('canvas');
   const { vp, os, task } = await drawPage(page, canvas, scale, dark);
   await task.promise;
   if (docId !== S.docId) return;
-  if (dark) {
+  if (mode !== 'light') {
     const rects = S.config.keepImagesInDarkMode ? await pageImageRects(page, i) : [];
-    darkenCanvas(canvas, C.toCanvasRects(rects, C.multiply([os, 0, 0, os, 0, 0], vp.transform), canvas.width, canvas.height));
+    tintCanvas(canvas, C.toCanvasRects(rects, C.multiply([os, 0, 0, os, 0, 0], vp.transform), canvas.width, canvas.height), C.pageTint(mode));
   }
   const holder = $('thumbs').children[i] && $('thumbs').children[i].querySelector('.thumbImg');
   if (holder) holder.replaceChildren(canvas);
@@ -790,12 +826,160 @@ function applySidebarDefault(open) {
 }
 function showTab(name, byUser) {
   if (byUser) $('sidebar').dataset.userTab = '1';
-  for (const t of ['outline', 'thumbs']) {
+  for (const t of ['outline', 'thumbs', 'hls']) {
     $(t).classList.toggle('active', t === name);
     $(t).hidden = t !== name;
     $('tab-' + t).setAttribute('aria-selected', t === name ? 'true' : 'false');
   }
   if (name === 'thumbs') updateThumbSelection();
+}
+
+// ---------- highlights ----------
+// Highlights are kept by the extension in VS Code's local storage, per file. The PDF is never changed.
+function setHighlights(list) {
+  S.highlights = list.filter((h) => h && Number.isInteger(h.page) && Array.isArray(h.rects));
+  paintAllHighlights();
+  renderHighlightList();
+}
+function saveHighlights() {
+  post({ type: 'highlights', items: S.highlights });
+  renderHighlightList();
+}
+function paintAllHighlights() {
+  for (let i = 0; i < S.pageEls.length; i++) paintPageHighlights(i);
+}
+function paintPageHighlights(i) {
+  const el = S.pageEls[i];
+  const layer = el && el.querySelector('.hlLayer');
+  if (!layer) return;
+  const frag = document.createDocumentFragment();
+  for (const h of S.highlights) {
+    if (h.page !== i + 1) continue;
+    for (const r of h.rects) {
+      const d = document.createElement('div');
+      d.className = 'hl hl-' + (['yellow', 'green', 'blue', 'pink'].includes(h.color) ? h.color : 'yellow');
+      d.dataset.id = h.id;
+      d.style.left = r[0] * 100 + '%';
+      d.style.top = r[1] * 100 + '%';
+      d.style.width = r[2] * 100 + '%';
+      d.style.height = r[3] * 100 + '%';
+      frag.appendChild(d);
+    }
+  }
+  layer.replaceChildren(frag);
+}
+function selectionInPages() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.rangeCount || !S.numPages) return null;
+  const range = sel.getRangeAt(0);
+  if (!$('pages').contains(range.commonAncestorContainer)) return null;
+  if (!C.cleanSelectionText(sel.toString())) return null;
+  return range;
+}
+function newId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+function highlightSelection(color) {
+  const range = selectionInPages();
+  hideHlPop();
+  if (!range) {
+    $('status').textContent = 'Select text in the PDF first.';
+    setTimeout(() => { if ($('status').textContent === 'Select text in the PDF first.') $('status').textContent = ''; }, 2500);
+    return;
+  }
+  const text = C.cleanSelectionText(window.getSelection().toString());
+  const clientRects = [...range.getClientRects()];
+  const made = [];
+  S.pageEls.forEach((el, i) => {
+    if (!range.intersectsNode(el)) return;
+    const b = el.getBoundingClientRect();
+    const rects = C.selectionRects(clientRects, { left: b.left, top: b.top, width: b.width, height: b.height });
+    if (!rects.length) return;
+    made.push({ id: newId() + made.length, page: i + 1, rects, text: made.length ? '' : text, color: color || 'yellow', created: Date.now() });
+  });
+  if (!made.length) return;
+  window.getSelection().removeAllRanges();
+  S.highlights = S.highlights.concat(made);
+  for (const h of made) paintPageHighlights(h.page - 1);
+  saveHighlights();
+  $('status').textContent = 'Highlighted. It is listed in the sidebar under Highlights.';
+  setTimeout(() => { if ($('status').textContent.startsWith('Highlighted')) $('status').textContent = ''; }, 3000);
+}
+function removeHighlight(id) {
+  const h = S.highlights.find((x) => x.id === id);
+  S.highlights = S.highlights.filter((x) => x.id !== id);
+  if (h) paintPageHighlights(h.page - 1);
+  saveHighlights();
+}
+function goToHighlight(h) {
+  const top = h.rects.reduce((m, r) => Math.min(m, r[1]), 1);
+  scrollToPage(h.page, null, Math.max(0, top - 0.08));
+  saveState();
+  const el = S.pageEls[h.page - 1];
+  if (el) el.querySelectorAll('.hl[data-id="' + CSS.escape(h.id) + '"]').forEach((d) => {
+    d.classList.add('flash');
+    setTimeout(() => d.classList.remove('flash'), 1200);
+  });
+}
+function renderHighlightList() {
+  const list = $('hlList');
+  const items = S.highlights.slice().sort((a, b) => a.page - b.page || a.rects[0][1] - b.rects[0][1] || a.rects[0][0] - b.rects[0][0]);
+  $('hlCount').textContent = items.length === 1 ? '1 highlight' : items.length + ' highlights';
+  $('hlCopy').hidden = !items.length;
+  const frag = document.createDocumentFragment();
+  if (!items.length) {
+    const li = document.createElement('li');
+    li.className = 'empty';
+    li.textContent = 'Select text in the PDF, then click a color or press H. Highlights stay on this computer and the PDF file is not changed.';
+    frag.appendChild(li);
+  }
+  for (const h of items) {
+    const li = document.createElement('li');
+    li.className = 'c-' + h.color;
+    li.title = 'Go to page ' + h.page;
+    const page = document.createElement('span');
+    page.className = 'hlPage';
+    page.textContent = 'p. ' + h.page;
+    const t = document.createElement('span');
+    t.className = 'hlText';
+    t.textContent = h.text || '(continued)';
+    const del = document.createElement('button');
+    del.className = 'hlDel';
+    del.textContent = '×';
+    del.title = 'Remove this highlight';
+    del.setAttribute('aria-label', 'Remove highlight on page ' + h.page);
+    del.addEventListener('click', (e) => { e.stopPropagation(); removeHighlight(h.id); });
+    li.append(page, t, del);
+    li.addEventListener('click', () => goToHighlight(h));
+    frag.appendChild(li);
+  }
+  list.replaceChildren(frag);
+}
+function hideHlPop() { $('hlPop').hidden = true; }
+function showHlPopSoon() {
+  setTimeout(() => {
+    const range = selectionInPages();
+    if (!range) { hideHlPop(); return; }
+    const rects = [...range.getClientRects()].filter((r) => r.width > 1 && r.height > 1);
+    if (!rects.length) { hideHlPop(); return; }
+    const last = rects[rects.length - 1];
+    const pop = $('hlPop');
+    pop.hidden = false;
+    const pw = pop.offsetWidth || 110;
+    const x = Math.min(Math.max(4, last.right - pw / 2), window.innerWidth - pw - 4);
+    const y = last.bottom + 6 + 32 > window.innerHeight ? last.top - 36 : last.bottom + 6;
+    pop.style.left = x + 'px';
+    pop.style.top = Math.max(4, y) + 'px';
+  }, 0);
+}
+function wireHighlights() {
+  $('pages').addEventListener('mouseup', showHlPopSoon);
+  $('pages').addEventListener('keyup', (e) => { if (e.shiftKey) showHlPopSoon(); });
+  $('viewer').addEventListener('scroll', hideHlPop, { passive: true });
+  document.addEventListener('mousedown', (e) => { if (!$('hlPop').contains(e.target)) hideHlPop(); });
+  $('hlPop').addEventListener('mousedown', (e) => e.preventDefault()); // keep the text selection
+  $('hlPop').querySelectorAll('.hlSwatch').forEach((b) => b.addEventListener('click', () => highlightSelection(b.dataset.color)));
+  renderHighlightList();
 }
 
 // ---------- toolbar ----------
@@ -891,6 +1075,10 @@ function wireUi() {
     setZoom(Number.isFinite(+val) ? C.clampScale(+val) : C.parseZoom(val));
   });
   $('darkBtn').addEventListener('click', toggleDark);
+  $('sepiaBtn').addEventListener('click', toggleSepia);
+  $('tab-hls').addEventListener('click', () => showTab('hls', true));
+  $('hlCopy').addEventListener('click', () => post({ type: 'copyHighlights' }));
+  wireHighlights();
   $('sidebarBtn').addEventListener('click', () => toggleSidebar());
   $('tab-outline').addEventListener('click', () => showTab('outline', true));
   $('tab-thumbs').addEventListener('click', () => showTab('thumbs', true));
@@ -914,6 +1102,8 @@ function wireUi() {
     // Ctrl/Cmd + and - are contributed keybindings (package.json). VS Code forwards every webview keydown
     // to the workbench, so handling them here too would zoom twice, or zoom the whole window.
     if (inInput) return;
+    if ((e.key === 'h' || e.key === 'H') && !mod && !e.altKey && selectionInPages()) { e.preventDefault(); highlightSelection('yellow'); return; }
+    if (e.key === 'Escape' && !$('hlPop').hidden) { hideHlPop(); return; }
     if (e.key === 'ArrowRight' && !mod) { e.preventDefault(); scrollToPage(S.page + 1); }
     else if (e.key === 'ArrowLeft' && !mod) { e.preventDefault(); scrollToPage(S.page - 1); }
     else if (e.key === 'Home' && !mod) { e.preventDefault(); scrollToPage(1); }

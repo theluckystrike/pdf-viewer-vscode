@@ -1,17 +1,15 @@
-# PDF Viewer & PDF Reader with Dark Mode
+# PDF Viewer & PDF Reader
 
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pdf-viewer-dark?label=VS%20Code%20installs" alt="VS Code installs"></a>
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pdf-viewer-dark?label=version" alt="Version"></a>
 
-For developers who read specs and papers next to their code, this PDF viewer and PDF reader shows PDFs in VS Code with dark pages that keep photos and charts in their real colors.
+A PDF viewer and PDF reader for VS Code. Read specs and papers next to your code on dark or sepia pages that keep photos in their real colors, and highlight the parts you want to find again.
 
-![A 3 page earthquake report open in VS Code with dark pages. The outline is open on the left, the search box has Japan with 1 of 4 matches, and the map keeps its original colors](https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-pdf-dark.png)
+![A PDF open in VS Code with dark pages. Three passages are highlighted in yellow, green and blue, and the Highlights tab on the left lists them with their page numbers](https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-highlights-dark.png)
 
-*A real VS Code 1.142 window running this extension on [`test/fixtures/earthquakes-october-2026.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/main/test/fixtures/earthquakes-october-2026.pdf), a 3 page report generated from the USGS earthquake catalog for October 2026.*
-
-- Dark pages that are easy on the eyes at night. Text, lines and backgrounds go dark. Photos keep their colors.
-- Find in PDF highlights every match and jumps between them with Enter. The outline and page thumbnails sit in one sidebar.
-- It runs offline. pdf.js is bundled inside the extension, and it makes no network calls and sends no telemetry.
+- Highlights: select text and pick one of 4 colors, or press `H`. The Highlights tab lists them, a click jumps back, and "Copy as Markdown" gives you a list with a link to each page for your notes. The PDF file is not changed.
+- Dark and sepia pages: dark pages for night, warm sepia pages for long reading. Text, lines and backgrounds change color. Photos keep theirs.
+- Find, outline and pages: Find in PDF highlights every match, and the sidebar has the outline and page thumbnails. Each PDF reopens where you left it. It runs offline, with no telemetry.
 
 ## Quick start
 
@@ -24,9 +22,35 @@ For developers who read specs and papers next to their code, this PDF viewer and
 
 Run "Get Started with PDF Reader" from the Welcome page for a short tour.
 
+## Highlights you can take to your notes
+
+Select text on a page. A small bar with 4 colors appears under the selection. Click a color, or press `H` for yellow.
+
+<img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-highlight-colors.png" alt="Text selected on a light page, with the color bar under it showing yellow, green, blue and pink" width="640">
+
+The sidebar's Highlights tab lists every highlight of the file with its page. Click one to jump to it, or click × to remove it. Highlights are saved in VS Code on this computer, for each file, and come back when you open the PDF again. They are not written into the PDF.
+
+"Copy as Markdown" (or "PDF: Copy Highlights as Markdown" in the Command Palette) copies a list like this:
+
+```markdown
+## Highlights in earthquakes-october-2026.pdf
+
+- "The largest event was a magnitude 7.7 earthquake 10 km WSW of Pitaloza Arriba, Panama on" ([page 1](/docs/earthquakes-october-2026.pdf#page=1))
+```
+
+Paste it into a `.md` file. In the Markdown preview each link opens the PDF at that page.
+
+<img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-highlights-markdown.png" alt="The copied highlights pasted into a Markdown file, with the Markdown preview showing the quotes and their page links" width="640">
+
+## Sepia pages
+
+The paper button next to the moon switches the open PDF to warm sepia pages, which are softer on the eyes than white. Photos and images keep their colors, as in dark mode. Set `pdfViewer.lightPages` to `sepia` to use it for every PDF.
+
+<img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/vscode-sepia.png" alt="The report on sepia pages with the Highlights tab open. The earthquake map keeps its original colors" width="640">
+
 ## Dark mode that leaves images alone
 
-Most dark PDF modes invert the whole page, so a photo of a blue sky turns orange. PDF Reader inverts the page, then paints the original pixels of each raster image back on top.
+Most dark PDF modes invert the whole page, so a photo of a blue sky turns orange. This viewer inverts the page, then paints the original pixels of each raster image back on top.
 
 <img src="https://raw.githubusercontent.com/theluckystrike/pdf-viewer-vscode/main/images/light-vs-dark.png" alt="The same page in the light theme on the left and in dark mode on the right. The map image has the same colors on both sides." width="640">
 
@@ -69,6 +93,7 @@ You don't have to type the links. "PDF: Copy Link to This Page" copies a link to
 | `Home`, `End` | First or last page |
 | `Ctrl+=`, `Ctrl+-` | Zoom in, zoom out |
 | `Ctrl+G` | Go to page |
+| `H` | Highlight the selected text in yellow |
 
 The viewer leaves other VS Code keys alone. `Ctrl+P` opens Quick Open and `Ctrl+Shift+P` opens the Command Palette, as in any other editor.
 
@@ -77,7 +102,8 @@ The viewer leaves other VS Code keys alone. `Ctrl+P` opens Quick Open and `Ctrl+
 | Setting | Default | What it does |
 | --- | --- | --- |
 | `pdfViewer.darkMode` | `auto` | `auto` follows the theme, `on` always dark, `off` never dark |
-| `pdfViewer.keepImagesInDarkMode` | `true` | Keep raster images in their colors in dark mode |
+| `pdfViewer.keepImagesInDarkMode` | `true` | Keep raster images in their colors on dark and sepia pages |
+| `pdfViewer.lightPages` | `white` | `sepia` shows light pages in warm paper colors |
 | `pdfViewer.defaultZoom` | `page-width` | Zoom for a PDF you open for the first time |
 | `pdfViewer.rememberLastPage` | `true` | Reopen each PDF at the last page and zoom (up to 500 files) |
 | `pdfViewer.sidebar` | `closed` | `closed` keeps the sidebar closed, `open` opens it for every PDF, `remember` keeps your last choice |
@@ -104,7 +130,8 @@ A link inside a PDF opens in your browser only when you click it, and only for `
 
 ## Known limits
 
-- It is a viewer. It doesn't fill forms, add annotations or print.
+- Highlights live in VS Code on this computer, not in the PDF file, so other PDF apps don't show them and they don't sync to other machines.
+- It doesn't fill forms, edit the PDF or print.
 - Big files load fully into memory. Above 200 MB it asks first, and you can change the limit.
 - Pages render on demand, so a 1,000 page PDF opens at page 1 at once, but search reads every page and takes longer on very long files.
 - A `#page=` link opens the page from the Markdown preview. A `Ctrl`+click on the same link in the text editor opens the PDF at the page you read last, because VS Code drops the part after `#` there.

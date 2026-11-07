@@ -2,7 +2,7 @@
   "name": "pdf-viewer-dark",
   "displayName": "PDF Viewer & PDF Reader",
   "description": "PDF viewer and PDF reader for VS Code: dark or sepia pages that keep photos in their true colors, highlights you can copy as Markdown, search, outline and thumbnails, all offline.",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -390,7 +390,7 @@
     "postinstall": "node scripts/copy-pdfjs.js",
     "test": "node --test test/*.test.js",
     "test:browser": "python3 test/e2e/run.py",
-    "package": "npx -y @vscode/vsce@3 package --no-dependencies -o dist/",
+    "package": "npx -y @vscode/vsce@3 package --no-dependencies --no-rewrite-relative-links -o dist/",
     "test:vscode": "node test/vscode/run.js"
   },
   "devDependencies": {

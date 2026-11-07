@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.6 (2026-11-07)
+
+- The Marketplace page shows the Markdown examples as written. The page links in the "Copy as Markdown" sample and the `docs/paper.pdf#page=12` example were turned into GitHub links to files that do not exist.
+
 ## 0.2.5 (2026-11-07)
 
 - Highlights. Select text in a PDF and pick yellow, green, blue or pink from the bar under the selection, or press `H`. A new Highlights tab in the sidebar lists them by page. A click jumps to one, × removes it. They are saved in VS Code for each file, and the PDF file is not changed.

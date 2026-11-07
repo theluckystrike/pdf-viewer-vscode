@@ -44,7 +44,9 @@ test('protocol: readConfig normalises settings', () => {
 // ---------- CSP ----------
 test('html: strict CSP, nonce on scripts, no remote or eval sources', () => {
   const uris = { core: 'https://r/core.js', viewer: 'https://r/viewer.js', css: 'https://r/v.css', pdfjs: 'https://r/pdf.min.mjs', worker: 'https://r/w.mjs', cmaps: 'https://r/c/', fonts: 'https://r/f/', wasm: 'https://r/w/' };
-  const html = buildHtml(uris, 'https://r', 'NONCE1');
+  // The footer's Rate link is a click-only link to the Marketplace review page, not a loaded resource.
+  const rateLink = / href=\"https:\/\/marketplace\.visualstudio\.com\/items\?itemName=[^\"]+#review-details\"/g;
+  const html = buildHtml(uris, 'https://r', 'NONCE1').replace(rateLink, '');
   const csp = /content="([^"]+)"/.exec(html)[1];
   assert.match(csp, /default-src 'none'/);
   assert.match(csp, /script-src 'nonce-NONCE1' https:\/\/r 'wasm-unsafe-eval'/);

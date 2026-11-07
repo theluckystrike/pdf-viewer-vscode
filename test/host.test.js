@@ -477,9 +477,10 @@ test('support: Sponsor opens GitHub Sponsors, More free viewers opens the picked
   await fake.commands.get('pdfViewer.moreViewers')();
   assert.deepEqual(ran.filter((a) => a[0] === 'extension.open'), [['extension.open', 'zovo.table-viewer-vscode']]);
   assert.equal(ran.filter((a) => a[0] === 'workbench.extensions.installExtension').length, 0);
-  pickFn = async (items) => items.find((i) => i.product && !i.product.live);
+  // A queued extension opens its GitHub page. When every Zovo extension is live (2026-11-08), "Zovo on GitHub" does.
+  pickFn = async (items) => items.find((i) => i.product && !i.product.live) || items.find((i) => i.link === 'https://github.com/theluckystrike');
   await fake.commands.get('pdfViewer.moreViewers')();
-  assert.match(fake.opened[1], /^https:\/\/github\.com\/theluckystrike\//);
+  assert.match(fake.opened[1], /^https:\/\/github\.com\/theluckystrike(\/|$)/);
 });
 
 // ---------- UPD1: open at a page from a link, go to page, copy a link to the page ----------

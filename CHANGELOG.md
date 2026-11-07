@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.7 (2026-11-08)
+
+- The "More free viewers" list and the README now use the current Marketplace names and include the newest Zovo extensions: ZIP, GCode, EPUB, HAR, font and audio viewers.
+
 ## 0.2.6 (2026-11-07)
 
 - The Marketplace page shows the Markdown examples as written. The page links in the "Copy as Markdown" sample and the `docs/paper.pdf#page=12` example were turned into GitHub links to files that do not exist.

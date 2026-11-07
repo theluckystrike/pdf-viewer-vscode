@@ -11,7 +11,7 @@ test('More free viewers starts with 3 to 5 related extensions, without this one'
   const rel = support.relatedProducts(SELF);
   assert.ok(rel.length >= 3 && rel.length <= 5, String(rel.length));
   assert.ok(rel.every((p) => p.id !== SELF));
-  assert.deepEqual(rel.map((p) => p.id), ["zovo.docx-viewer-vscode", "zovo.pptx-slide-viewer", "zovo.table-viewer-vscode", "zovo.zovo-graphviz-preview", "zovo.video-preview-with-sound"]);
+  assert.deepEqual(rel.map((p) => p.id), ["zovo.docx-viewer-vscode", "zovo.pptx-slide-viewer", "zovo.zovo-epub-reader", "zovo.table-viewer-vscode", "zovo.eml-viewer"]);
   const items = support.pickItems(SELF, () => false);
   assert.equal(items[0].label, 'Related to this extension');
   assert.deepEqual(items.slice(1, 1 + rel.length).map((i) => i.product.id), rel.map((p) => p.id));

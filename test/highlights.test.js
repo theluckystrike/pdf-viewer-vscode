@@ -137,8 +137,10 @@ test('package: new commands, setting and listing text', () => {
   const s = pkg.contributes.configuration.properties['pdfViewer.lightPages'];
   assert.deepEqual(s.enum, ['white', 'sepia']);
   assert.equal(s.default, 'white');
-  assert.equal(pkg.displayName, 'PDF Viewer & PDF Reader');
+  assert.equal(pkg.displayName, 'PDF Viewer & Reader to Read and View PDF in Dark Mode');
+  const words = new Set(pkg.displayName.toLowerCase().split(/[^a-z0-9]+/));
+  for (const q of ['pdf viewer', 'pdf reader', 'view pdf', 'read pdf', 'pdf dark mode']) assert.ok(q.split(' ').every((w) => words.has(w)), q);
   assert.ok(pkg.keywords.length <= 30 && new Set(pkg.keywords).size === pkg.keywords.length);
   const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8');
-  assert.match(readme.split('\n')[0], /^# PDF Viewer & PDF Reader$/);
+  assert.match(readme.split('\n')[0], /^# PDF Viewer & Reader to Read and View PDF in Dark Mode$/);
 });

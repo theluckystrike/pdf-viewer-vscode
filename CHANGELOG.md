@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.10 (2026-11-08)
+
+- The Marketplace name is now "PDF Viewer & Reader to Read and View PDF in Dark Mode" (was "PDF Viewer & PDF Reader"), so more searches find it. The extension ID, settings and commands stay the same.
+- The short description now starts with what the name does not say: free and offline, with sepia pages and highlights you can copy as Markdown.
+- A brighter icon with the file type on it, easier to spot in the Extensions view.
+- The viewer footer now starts with Rate, then More free viewers, Sponsor and Hide. The rating question comes after 2 files that opened without an error in 2 sessions at least 4 hours apart.
+
 ## 0.2.9 (2026-11-08)
 
 - Search and text selection now work in VS Code 1.90 and 1.91 and in older Cursor, Windsurf and VSCodium builds that are based on them. Before, the pages showed but the text layer did not load there.

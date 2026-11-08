@@ -430,6 +430,37 @@
     return { page: anchor.page, zoom: anchor.zoom, scrollRatio: anchor.scrollRatio, at: now };
   }
 
+  // ---------- stream iteration (older Chromium) ----------
+  // pdf.js uses `for await (const chunk of readableStream)`. ReadableStream became async iterable in
+  // Chromium 124 (VS Code 1.92). In VS Code 1.90 and 1.91 (Chromium 122), and in editors built on them,
+  // getTextContent then fails, so search and text selection break. This adds the standard iterator when
+  // it is missing. viewer.js also prepends it to the worker code, so it must stay self-contained.
+  function installStreamIterator(g) {
+    const RS = g && g.ReadableStream;
+    if (!RS || !RS.prototype || typeof RS.prototype[Symbol.asyncIterator] === 'function') return false;
+    const values = function (opts) {
+      const preventCancel = !!(opts && opts.preventCancel);
+      const reader = this.getReader();
+      return {
+        next() { return reader.read(); },
+        async return(value) {
+          if (!preventCancel) { const c = reader.cancel(value); reader.releaseLock(); await c; } else reader.releaseLock();
+          return { done: true, value };
+        },
+        [Symbol.asyncIterator]() { return this; },
+      };
+    };
+    if (typeof RS.prototype.values !== 'function') {
+      Object.defineProperty(RS.prototype, 'values', { value: values, writable: true, configurable: true });
+    }
+    Object.defineProperty(RS.prototype, Symbol.asyncIterator, { value: RS.prototype.values, writable: true, configurable: true });
+    return true;
+  }
+  /** Source text that installs the iterator in another realm (the pdf.js worker). */
+  function streamIteratorSource() {
+    return '(' + installStreamIterator.toString() + ')(globalThis);\n';
+  }
+
   return {
     multiply, applyPoint, bboxOf, imageRects, toCanvasRects,
     computeScale, clampScale, nextZoom, parseZoom, ZOOM_STEPS, MIN_SCALE, MAX_SCALE,
@@ -437,5 +468,6 @@
     flattenOutline, resolveDest, isSafeExternalUrl, isDark, visiblePages, currentPage, toBytes, visibilityAction,
     selectionRects, cleanSelectionText, pageMode, pageTint, SEPIA_PAPER,
     reloadAnchor, reloadStash, RELOAD_STASH_MS,
+    installStreamIterator, streamIteratorSource,
   };
 });

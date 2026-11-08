@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.9 (2026-11-08)
+
+- Search and text selection now work in VS Code 1.90 and 1.91 and in older Cursor, Windsurf and VSCodium builds that are based on them. Before, the pages showed but the text layer did not load there.
+
 ## 0.2.8 (2026-11-08)
 
 - A PDF that a build tool is still writing no longer flashes "This file is not a valid PDF". The last version stays on screen, with a note in the status bar, until the new file can be read. After the reload you are on the same page, at the same zoom and scroll position (before, the scroll position inside the page was lost).

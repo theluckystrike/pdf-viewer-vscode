@@ -112,12 +112,13 @@ function runCommand(name) {
 // ---------- pdf.js setup ----------
 async function ensurePdfjs() {
   if (pdfjsLib) return pdfjsLib;
+  PdfCore.installStreamIterator(globalThis);
   pdfjsLib = await import(DATA.pdfjs);
   // Webviews cannot start a worker from the extension origin, so we load the bundled worker file
   // into a blob URL. The code is the same file shipped in the extension.
   const res = await fetch(DATA.worker);
   if (!res.ok) throw new Error('Could not load the bundled pdf.js worker.');
-  const blob = new Blob([await res.text()], { type: 'text/javascript' });
+  const blob = new Blob([PdfCore.streamIteratorSource(), await res.text()], { type: 'text/javascript' });
   workerPort = new Worker(URL.createObjectURL(blob), { type: 'module' });
   pdfjsLib.GlobalWorkerOptions.workerPort = workerPort;
   return pdfjsLib;

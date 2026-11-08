@@ -219,3 +219,55 @@ test('reloadStash: kept only when the new file is too short to show the position
   assert.equal(C.reloadStash(null, 3, 10), null);
   assert.equal(C.reloadStash({ page: 'x' }, 3, 10), null);
 });
+
+// ---------- stream iteration polyfill (Chromium < 124, VS Code 1.90 and 1.91) ----------
+function fakeStreamGlobal(chunks) {
+  const log = [];
+  function FakeRS(items) { this.items = items.slice(); }
+  FakeRS.prototype.getReader = function () {
+    const self = this;
+    return {
+      read: async () => (self.items.length ? { done: false, value: self.items.shift() } : { done: true, value: undefined }),
+      cancel: async (r) => { log.push('cancel:' + r); },
+      releaseLock: () => { log.push('release'); },
+    };
+  };
+  return { g: { ReadableStream: FakeRS }, make: () => new FakeRS(chunks), log };
+}
+
+test('installStreamIterator makes an old ReadableStream async iterable', async () => {
+  const { g, make } = fakeStreamGlobal(['a', 'b', 'c']);
+  assert.equal(C.installStreamIterator(g), true);
+  const out = [];
+  for await (const x of make()) out.push(x);
+  assert.deepEqual(out, ['a', 'b', 'c']);
+  assert.equal(C.installStreamIterator(g), false, 'second call does nothing');
+});
+
+test('installStreamIterator: leaving the loop early cancels the stream and releases the lock', async () => {
+  const { g, make, log } = fakeStreamGlobal(['a', 'b', 'c']);
+  C.installStreamIterator(g);
+  for await (const x of make()) { if (x === 'a') break; }
+  assert.deepEqual(log, ['cancel:undefined', 'release']);
+});
+
+test('installStreamIterator keeps a native iterator and ignores a missing ReadableStream', () => {
+  const native = async function* () {};
+  function RS() {}
+  RS.prototype[Symbol.asyncIterator] = native;
+  assert.equal(C.installStreamIterator({ ReadableStream: RS }), false);
+  assert.equal(RS.prototype[Symbol.asyncIterator], native);
+  assert.equal(C.installStreamIterator({}), false);
+  assert.equal(C.installStreamIterator(null), false);
+});
+
+test('streamIteratorSource installs the same iterator in another realm (the worker)', async () => {
+  const vm = require('node:vm');
+  const { g, make } = fakeStreamGlobal(['x', 'y']);
+  const ctx = vm.createContext({ ReadableStream: g.ReadableStream });
+  vm.runInContext(C.streamIteratorSource(), ctx);
+  assert.equal(typeof g.ReadableStream.prototype[Symbol.asyncIterator], 'function');
+  const out = [];
+  for await (const x of make()) out.push(x);
+  assert.deepEqual(out, ['x', 'y']);
+});

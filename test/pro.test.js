@@ -401,7 +401,7 @@ test('activate: no message, no modal and no network at start; Pro commands are r
     await api.pro.ready;
     await new Promise((r) => setTimeout(r, 20));
     for (const id of ['pdfViewer.pageTools', 'pdfViewer.extractPages', 'pdfViewer.deletePages', 'pdfViewer.splitPdf', 'pdfViewer.mergePdfs', 'pdfViewer.exportAllHighlights',
-      'pdfViewer.getPro', 'pdfViewer.unlockWithSponsors', 'pdfViewer.enterLicenseKey', 'pdfViewer.removeLicense']) assert.ok(registered.includes(id), id);
+      'pdfViewer.getPro', 'pdfViewer.payWithPayPal', 'pdfViewer.unlockWithSponsors', 'pdfViewer.enterLicenseKey', 'pdfViewer.removeLicense']) assert.ok(registered.includes(id), id);
     assert.equal(f.log.info.length + f.log.warn.length + f.log.modal.length, 0);
     assert.equal(fetched, 0);
     const pkg = require('../package.json');
@@ -421,7 +421,7 @@ test('package.json: Pro commands hide with the setting, free commands do not', (
   for (const id of ['pdfViewer.pageTools', 'pdfViewer.mergePdfs', 'pdfViewer.getPro', 'pdfViewer.exportAllHighlights']) {
     assert.match(pal.find((m) => m.command === id).when, /config\.pdfViewer\.showProFeatures/, id);
   }
-  for (const m of pal) if (!/Pro|License|Sponsors|getPro|pageTools|extractPages|deletePages|splitPdf|mergePdfs|exportAllHighlights/.test(m.command)) assert.doesNotMatch(m.when || '', /showProFeatures/, m.command);
+  for (const m of pal) if (!/Pro|License|Sponsors|PayPal|getPro|pageTools|extractPages|deletePages|splitPdf|mergePdfs|exportAllHighlights/.test(m.command)) assert.doesNotMatch(m.when || '', /showProFeatures/, m.command);
   assert.equal(pkg.contributes.configuration.properties['pdfViewer.showProFeatures'].default, true);
 });
 

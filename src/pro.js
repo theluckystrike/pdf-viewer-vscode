@@ -27,12 +27,13 @@ const FEATURES = {
   }
 };
 
-const PRICE_LINE = 'Zovo Pro is USD 19 once and unlocks the Pro features in every Zovo viewer. Already bought the "$19 one time" tier on GitHub Sponsors? Choose Unlock with GitHub Sponsors: it asks GitHub one question and sends nothing else. Paid with PayPal? Choose I have a license key.';
+// The shared module adds the "How to buy" paragraph (GitHub Sponsors tier, PayPal USD 19 / team USD 59) after this.
+const PRICE_LINE = 'Zovo Pro is USD 19 once, for life, and unlocks the Pro features in every Zovo viewer.';
 const FREE_LINE = 'Everything else in PDF Viewer stays free: reading, dark and sepia pages, search, outline, thumbnails, highlights, Copy Highlights as Markdown and page links.';
 
 function createPro({ vscode, context, license, enabled }) {
   const on = enabled === undefined ? PRO_ENABLED : enabled;
-  const lic = license || createLicense({ vscode, context, sku: SKU, name: 'Zovo', commandPrefix: 'pdfViewer' });
+  const lic = license || createLicense({ vscode, context, sku: SKU, name: 'Zovo', product: 'PDF Viewer', commandPrefix: 'pdfViewer' });
   const used = (f) => Number((context.globalState.get(TRIAL_KEY) || {})[f]) || 0;
   const left = (f) => (FEATURES[f] ? Math.max(0, TRIAL_USES - used(f)) : 0);
   const pro = () => !on || lic.isPro(SKU);

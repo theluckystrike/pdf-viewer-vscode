@@ -199,6 +199,11 @@
         "category": "PDF"
       },
       {
+        "command": "pdfViewer.payWithPayPal",
+        "title": "Zovo: Pay for Pro with PayPal (USD 19, key by email)",
+        "category": "PDF"
+      },
+      {
         "command": "pdfViewer.enterLicenseKey",
         "title": "Zovo: Enter License Key",
         "category": "PDF"
@@ -320,6 +325,10 @@
         },
         {
           "command": "pdfViewer.removeLicense",
+          "when": "config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.payWithPayPal",
           "when": "config.pdfViewer.showProFeatures"
         }
       ]

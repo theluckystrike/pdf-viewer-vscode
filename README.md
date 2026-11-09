@@ -12,6 +12,7 @@ It reloads when the PDF changes on disk, after a LaTeX, Typst or report build, a
 - Highlights: select text and pick one of 4 colors, or press `H`. The Highlights tab lists them, a click jumps back, and "Copy as Markdown" gives you a list with a link to each page for your notes. The PDF file is not changed.
 - Dark and sepia pages: dark pages for night, warm sepia pages for long reading. Text, lines and backgrounds change color. Photos keep theirs.
 - Find, outline and pages: Find in PDF highlights every match, and the sidebar has the outline and page thumbnails. Each PDF reopens where you left it. It runs offline, with no telemetry.
+- Optional Zovo Pro (USD 19 once, for every Zovo viewer): page tools that save a new PDF (extract, delete, reorder, split), merge PDFs, and the highlights of all your PDFs in one Markdown file. Each one works 3 times for free. Everything above stays free.
 
 ## Quick start
 
@@ -110,6 +111,7 @@ The viewer leaves other VS Code keys alone. `Ctrl+P` opens Quick Open and `Ctrl+
 | `pdfViewer.rememberLastPage` | `true` | Reopen each PDF at the last page and zoom (up to 500 files) |
 | `pdfViewer.sidebar` | `closed` | `closed` keeps the sidebar closed, `open` opens it for every PDF, `remember` keeps your last choice |
 | `pdfViewer.maxFileSizeMB` | `200` | Ask before opening larger PDFs |
+| `pdfViewer.showProFeatures` | `true` | Show the Zovo Pro page tools button and commands. `false` hides them; everything free stays |
 | `pdfViewer.askForRating` | `true` | Ask for a rating after 2 files opened without an error in 2 sessions at least 4 hours apart. "Rate it" opens the Marketplace review page in VS Code and the Open VSX one in Cursor, Windsurf and VSCodium. "Later" asks one more time after 7 days, "No thanks" never again. It never asks after an error. Turn it off with `false`. |
 
 ## More screenshots
@@ -124,11 +126,23 @@ The viewer leaves other VS Code keys alone. `Ctrl+P` opens Quick Open and `Ctrl+
 
 *Real output, light and dark. The extension's own webview code and its bundled pdf.js render [`test/fixtures/earthquakes-october-2026.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/main/test/fixtures/earthquakes-october-2026.pdf), a 3 page report built from the real USGS earthquake catalog for October 2026. [`scripts/readme-shots`](https://github.com/theluckystrike/pdf-viewer-vscode/tree/main/scripts/readme-shots) has the scripts that build the PDF and capture the shots in headless Chrome.*
 
+## Page tools, merge and all highlights (Zovo Pro)
+
+Click the page tools button in the toolbar (the stacked pages icon), or run "PDF: Page Tools (Pro)..." from the Command Palette or the `...` menu of the PDF tab.
+
+- Extract pages to a new PDF: type `1-3, 7, 10-`. The order you type is the order you get, so `5, 1-4` moves page 5 to the front.
+- Delete pages: type the pages to drop and save the rest as a new PDF.
+- Split into several PDFs: every N pages, one file per page, or at the ranges you type. The files are named `report-part-01-p1-10.pdf` and so on, and it asks before it replaces a file.
+- Merge with other PDFs: pick the files, then choose whether this PDF goes first or last.
+- Export highlights of all PDFs: one Markdown file with the highlights of every PDF you highlighted (or only those in this workspace), grouped by file, with the color and a link to each page. The "All PDFs" link in the Highlights tab does the same.
+
+The new PDF is written by the same pdf.js that shows the page, on your computer. Links, the outline and form fields come along. A PDF with a password keeps the same password. The source files are not changed unless you pick one of them in the save dialog.
+
 ## Free and Zovo Pro
 
-This viewer is free and complete. Nothing in it is paid, and every feature it has today stays free.
+Everything you could do before stays free: reading, dark and sepia pages, search, the outline and thumbnails, highlights, Copy as Markdown and page links.
 
-Zovo Pro is optional: USD 19, paid once, for every Zovo VS Code viewer. Today it adds Pro features in [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) (binary templates with a structure view, bookmarks, checksums and compare reports) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) (redline export as a Word file with tracked changes, and folder compare). Pro features that come to other Zovo viewers later are included, this one too if it gets any. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
+Zovo Pro adds the page tools, merge and the all-highlights export above. Each one works 3 times on your computer before it asks. Zovo Pro is USD 19 once on GitHub Sponsors (the ["$19 one time" tier](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878)) and unlocks the Pro features in every Zovo VS Code viewer, including [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode). If you bought that tier, or have a monthly sponsorship of USD 10 or more that is still running, run "Zovo: Unlock Pro with GitHub Sponsors". The "$15 one time" and "$5 a month" tiers on the same page are for Obsidian plugins and do not include Zovo Pro. No GitHub account? Send USD 19 to [paypal.com/paypalme/najzzz/19](https://www.paypal.com/paypalme/najzzz/19) with "Zovo Pro" in the note, and you get a license key by email within a day; run "Zovo: Enter License Key". No popups on open, no ads, no countdown. Set `pdfViewer.showProFeatures` to `false` to hide the Pro button and commands. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
 
 ## Privacy and security
 
@@ -136,10 +150,12 @@ The extension reads the PDF with the VS Code file system API and hands the bytes
 
 A link inside a PDF opens in your browser only when you click it, and only for `http`, `https` and `mailto` links.
 
+Zovo Pro checks run on your computer. The only network call is the one you start with "Unlock with GitHub Sponsors": VS Code's GitHub sign-in and one question to GitHub about your sponsorship. A license key is checked offline.
+
 ## Known limits
 
 - Highlights live in VS Code on this computer, not in the PDF file, so other PDF apps don't show them and they don't sync to other machines.
-- It doesn't fill forms, edit the PDF or print.
+- It doesn't fill forms, edit text or images on a page, or print. The Zovo Pro page tools save whole pages into a new PDF; they don't rotate pages yet.
 - Big files load fully into memory. Above 200 MB it asks first, and you can change the limit.
 - Pages render on demand, so a 1,000 page PDF opens at page 1 at once, but search reads every page and takes longer on very long files.
 - A `#page=` link opens the page from the Markdown preview. A `Ctrl`+click on the same link in the text editor opens the PDF at the page you read last, because VS Code drops the part after `#` there.

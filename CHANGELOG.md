@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 (2026-11-09)
+
+- New, optional Zovo Pro tools: extract pages to a new PDF (in the order you type), delete pages, split a PDF into several files, merge PDFs, and export the highlights of all your PDFs to one Markdown file. Each works 3 times on your computer for free. Zovo Pro is USD 19 once and covers every Zovo viewer.
+- A page tools button in the toolbar and an "All PDFs" link in the Highlights tab. `pdfViewer.showProFeatures` set to `false` hides them.
+- Nothing that was free changed: reading, dark and sepia pages, search, outline, thumbnails, highlights and Copy as Markdown work as before. No popup on open.
+
 ## 0.2.14 (2026-11-09)
 
 - "Rate it" in the rating question and the Rate link in the viewer footer now open the review page of the store your editor installs from: the Visual Studio Marketplace in VS Code, Open VSX in Cursor, Windsurf, VSCodium and other editors that use Open VSX. Before, they always opened the Marketplace.

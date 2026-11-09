@@ -37,6 +37,7 @@ const S = {
   thumbsObserver: null,
   thumbsRendered: new Set(),
   docId: 0,
+  pro: { show: false, badge: false }, // Zovo Pro page tools button (from the host)
   reloadStash: null, // position from before a reload that opened a shorter (half-written) file
   hidden: false, // true while the VS Code tab is hidden; page canvases are freed then
 };
@@ -63,6 +64,7 @@ window.addEventListener('message', (ev) => {
       if (m.target && typeof m.target === 'object') S.target = m.target;
       if (typeof m.sidebarOpen === 'boolean') applySidebarDefault(m.sidebarOpen);
       if (Array.isArray(m.highlights)) setHighlights(m.highlights);
+      if (m.pro && typeof m.pro === 'object') applyPro(m.pro);
       $('fileName').textContent = typeof m.fileName === 'string' ? m.fileName : '';
       applyDarkClass();
       break;
@@ -90,11 +92,71 @@ window.addEventListener('message', (ev) => {
     case 'highlights':
       if (Array.isArray(m.items)) setHighlights(m.items);
       break;
+    case 'pro':
+      if (m.pro && typeof m.pro === 'object') applyPro(m.pro);
+      break;
+    case 'pageOp':
+      runPageOp(m);
+      break;
     case 'goTo':
       if (Number.isInteger(m.page) && S.numPages) { scrollToPage(m.page); saveState(); $('viewer').focus(); }
       break;
   }
 });
+
+// ---------- Zovo Pro page tools ----------
+// The button only opens the host's quick pick; the host asks for pages and file names and sends a 'pageOp' job back.
+function applyPro(p) {
+  S.pro = { show: p.show === true, badge: p.badge === true };
+  $('toolsBtn').hidden = !S.pro.show;
+  $('toolsBadge').hidden = !S.pro.badge;
+  $('hlAll').hidden = !S.pro.show || !S.highlights.length;
+}
+
+// Writes new PDFs with pdf.js (PDFDocumentProxy.extractPages) from the plans the host sent. Extra PDFs (merge) are
+// opened once first, so a broken or password-protected file gets a clear message instead of a worker error.
+async function runPageOp(m) {
+  const reply = (o) => post(Object.assign({ type: 'pageOpResult', id: m.id }, o));
+  try {
+    if (!S.doc) throw new Error('the PDF is not loaded yet');
+    if (!Array.isArray(m.plans) || !m.plans.length) throw new Error('nothing to do');
+    const lib = await ensurePdfjs();
+    const extras = Array.isArray(m.extras) ? m.extras.map((b) => C.toBytes(b)) : [];
+    const extraPages = [];
+    for (let i = 0; i < extras.length; i++) {
+      let needsPassword = false;
+      const task = lib.getDocument({ data: extras[i].slice(), isEvalSupported: false, enableXfa: false, useWorkerFetch: false, cMapUrl: DATA.cmaps, cMapPacked: true, standardFontDataUrl: DATA.fonts, wasmUrl: DATA.wasm });
+      task.onPassword = () => { needsPassword = true; task.destroy(); };
+      try {
+        const d = await task.promise;
+        extraPages.push(d.numPages);
+      } catch (e) {
+        throw new Error('file ' + (i + 1) + ' of the merge ' + (needsPassword ? 'needs a password' : 'is not a readable PDF'));
+      } finally {
+        task.destroy().catch(() => { /* ignore */ });
+      }
+    }
+    const results = [];
+    for (const plan of m.plans) {
+      const infos = plan.map((p) => {
+        const o = { document: p.src === -1 ? null : extras[p.src] };
+        if (p.src !== -1 && !o.document) throw new Error('missing file');
+        if (Array.isArray(p.includePages)) o.includePages = p.includePages;
+        if (Array.isArray(p.excludePages)) o.excludePages = p.excludePages;
+        return o;
+      });
+      $('status').textContent = m.plans.length > 1 ? 'Writing file ' + (results.length + 1) + ' of ' + m.plans.length + '…' : 'Writing the new PDF…';
+      const out = await S.doc.extractPages(infos);
+      if (!out || !out.byteLength) throw new Error('pdf.js could not write the new PDF');
+      results.push(out);
+    }
+    $('status').textContent = '';
+    reply({ results, extraPages });
+  } catch (e) {
+    $('status').textContent = '';
+    reply({ error: String((e && e.message) || e) });
+  }
+}
 
 function runCommand(name) {
   if (name === 'toggleDarkMode') toggleDark();
@@ -955,6 +1017,7 @@ function renderHighlightList() {
   const items = S.highlights.slice().sort((a, b) => a.page - b.page || a.rects[0][1] - b.rects[0][1] || a.rects[0][0] - b.rects[0][0]);
   $('hlCount').textContent = items.length === 1 ? '1 highlight' : items.length + ' highlights';
   $('hlCopy').hidden = !items.length;
+  $('hlAll').hidden = !S.pro.show || !items.length;
   const frag = document.createDocumentFragment();
   if (!items.length) {
     const li = document.createElement('li');
@@ -1107,6 +1170,8 @@ function wireUi() {
   $('sepiaBtn').addEventListener('click', toggleSepia);
   $('tab-hls').addEventListener('click', () => showTab('hls', true));
   $('hlCopy').addEventListener('click', () => post({ type: 'copyHighlights' }));
+  $('hlAll').addEventListener('click', () => post({ type: 'exportAllHighlights' }));
+  $('toolsBtn').addEventListener('click', () => post({ type: 'pageTools' }));
   wireHighlights();
   $('sidebarBtn').addEventListener('click', () => toggleSidebar());
   $('tab-outline').addEventListener('click', () => showTab('outline', true));

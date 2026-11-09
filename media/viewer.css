@@ -50,6 +50,10 @@ button, input, select {
   border-color: var(--vscode-inputOption-activeBorder, transparent);
 }
 .tb svg { width: 16px; height: 16px; fill: currentColor; }
+.proBadge { font-size: 9px; font-weight: 600; line-height: 1; padding: 2px 3px; margin-left: 3px; border-radius: 3px; letter-spacing: .3px;
+  color: var(--vscode-badge-foreground, #fff); background: var(--vscode-badge-background, #4d4d4d); }
+.proBadge[hidden] { display: none; }
+#hlAll { margin-left: 10px; }
 #pageInput { width: 46px; text-align: right; }
 #pageInput, #searchInput, #zoomSelect {
   height: 24px;

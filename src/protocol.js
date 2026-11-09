@@ -9,6 +9,14 @@ function isZoom(z) {
   return typeof z === 'number' && isFinite(z) && z >= 0.1 && z <= 8;
 }
 
+/** Bytes from the webview (Uint8Array or ArrayBuffer), or null. */
+function asBytes(v) {
+  if (v instanceof Uint8Array) return v;
+  if (v instanceof ArrayBuffer) return new Uint8Array(v);
+  if (ArrayBuffer.isView(v)) return new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
+  return null;
+}
+
 /** Returns a clean message object, or null when the message is unknown or malformed. */
 function parseWebviewMessage(m) {
   if (!m || typeof m !== 'object' || typeof m.type !== 'string') return null;
@@ -42,6 +50,23 @@ function parseWebviewMessage(m) {
     }
     case 'copyHighlights':
       return { type: 'copyHighlights' };
+    case 'pageTools':
+    case 'exportAllHighlights':
+      return { type: m.type };
+    case 'pageOpResult': {
+      // The PDF bytes pdf.js wrote for a Pro page tool. Only an answer to a job the host sent (id) is used.
+      if (!Number.isInteger(m.id) || m.id < 1) return null;
+      if (typeof m.error === 'string') return { type: 'pageOpResult', id: m.id, error: m.error.slice(0, 300) };
+      if (!Array.isArray(m.results) || !m.results.length || m.results.length > 1000) return null;
+      const results = [];
+      for (const r of m.results) {
+        const b = asBytes(r);
+        if (!b) return null;
+        results.push(b);
+      }
+      const extraPages = Array.isArray(m.extraPages) && m.extraPages.length <= 1000 && m.extraPages.every((n) => Number.isInteger(n) && n >= 0) ? m.extraPages : [];
+      return { type: 'pageOpResult', id: m.id, results, extraPages };
+    }
     default:
       return null;
   }
@@ -115,4 +140,4 @@ function markdownPageLink({ fileName, relPath, fileUri, page }) {
   return `[${mdLabel(fileName)}, page ${n}](${target}#page=${n})`;
 }
 
-module.exports = { parseWebviewMessage, readConfig, isZoom, parsePdfFragment, markdownPageLink, encodeLinkPath };
+module.exports = { asBytes, parseWebviewMessage, readConfig, isZoom, parsePdfFragment, markdownPageLink, encodeLinkPath };

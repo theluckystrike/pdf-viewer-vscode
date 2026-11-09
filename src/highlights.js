@@ -68,6 +68,33 @@ function highlightsToMarkdown(file, list) {
   return lines.join('\n') + '\n';
 }
 
+/**
+ * Zovo Pro: the highlights of many PDFs as one Markdown file. files: [{ fileName, relPath, fileUri, items }]
+ * (relPath null outside the workspace). Grouped by file (sorted by path), each line with its color and page link.
+ */
+function allHighlightsToMarkdown(files, opts) {
+  const o = opts || {};
+  const list = (files || []).filter((f) => f && Array.isArray(f.items) && f.items.length);
+  const label = (f) => (f.relPath != null ? f.relPath : f.fileName);
+  list.sort((a, b) => label(a).localeCompare(label(b)));
+  const total = list.reduce((n, f) => n + f.items.length, 0);
+  const lines = ['# PDF highlights', ''];
+  const when = o.date ? ' on ' + o.date : '';
+  lines.push(total + ' highlight' + (total === 1 ? '' : 's') + ' in ' + list.length + ' PDF' + (list.length === 1 ? '' : 's') + when + '. Each line links to its page.', '');
+  for (const f of list) {
+    const title = f.relPath != null ? f.relPath : f.fileName;
+    lines.push('## ' + title.replace(/[\\`*_#\[\]<>]/g, (c) => '\\' + c), '');
+    for (const h of sortHighlights(f.items)) {
+      const link = markdownPageLink({ fileName: f.fileName, relPath: f.relPath, fileUri: f.fileUri, page: h.page }).replace(/^\[[^\]]*\]/, '[page ' + h.page + ']');
+      const text = h.text ? h.text.replace(/\s+/g, ' ').trim() : '(no text)';
+      lines.push('- "' + text + '" (' + link + ', ' + h.color + ')');
+    }
+    lines.push('');
+  }
+  if (!list.length) lines.push('No highlights yet.', '');
+  return lines.join('\n');
+}
+
 class HighlightStore {
   constructor(memento, maxFiles) {
     this.memento = memento;
@@ -95,6 +122,14 @@ class HighlightStore {
     await this.memento.update(KEY, all);
     return clean;
   }
+  /** Every file with highlights: [{ key, items, t }], newest first. */
+  entries() {
+    const all = this._all();
+    return Object.keys(all)
+      .map((key) => ({ key, items: all[key] && Array.isArray(all[key].items) ? sanitizeHighlights(all[key].items) : [], t: (all[key] && all[key].t) || 0 }))
+      .filter((e) => e.items.length)
+      .sort((a, b) => b.t - a.t);
+  }
   count() {
     return Object.values(this._all()).reduce((n, e) => n + (Array.isArray(e.items) ? e.items.length : 0), 0);
   }
@@ -103,4 +138,4 @@ class HighlightStore {
   }
 }
 
-module.exports = { HighlightStore, sanitizeHighlight, sanitizeHighlights, highlightsToMarkdown, KEY, COLORS, MAX_PER_FILE };
+module.exports = { HighlightStore, sanitizeHighlight, sanitizeHighlights, highlightsToMarkdown, allHighlightsToMarkdown, KEY, COLORS, MAX_PER_FILE };

@@ -2,7 +2,7 @@
   "name": "pdf-viewer-dark",
   "displayName": "PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)",
   "description": "Free and offline. Sepia too, highlights to Markdown. PDF viewer and PDF reader for VS Code: dark or sepia pages that keep photos in their true colors, highlights you can copy as Markdown, search, outline, thumbnails and a reload on change that keeps your page.",
-  "version": "0.2.14",
+  "version": "0.3.0",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -157,6 +157,56 @@
         "command": "pdfViewer.moreViewers",
         "title": "More free viewers",
         "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.pageTools",
+        "title": "Page Tools (Pro)...",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.extractPages",
+        "title": "Extract Pages to a New PDF (Pro)...",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.deletePages",
+        "title": "Delete Pages (Pro)...",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.splitPdf",
+        "title": "Split PDF into Several Files (Pro)...",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.mergePdfs",
+        "title": "Merge with Other PDFs (Pro)...",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.exportAllHighlights",
+        "title": "Export Highlights of All PDFs to Markdown (Pro)...",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.unlockWithSponsors",
+        "title": "Zovo: Unlock Pro with GitHub Sponsors",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.getPro",
+        "title": "Zovo: Get Pro (USD 19 once, all Zovo viewers)",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.enterLicenseKey",
+        "title": "Zovo: Enter License Key",
+        "category": "PDF"
+      },
+      {
+        "command": "pdfViewer.removeLicense",
+        "title": "Zovo: Remove License from This Editor",
+        "category": "PDF"
       }
     ],
     "menus": {
@@ -165,6 +215,11 @@
           "command": "pdfViewer.toggleDarkMode",
           "when": "activeCustomEditorId == pdfViewer.preview",
           "group": "navigation"
+        },
+        {
+          "command": "pdfViewer.pageTools",
+          "when": "activeCustomEditorId == pdfViewer.preview && config.pdfViewer.showProFeatures",
+          "group": "1_pro@1"
         }
       ],
       "explorer/context": [
@@ -226,6 +281,46 @@
         {
           "command": "pdfViewer.copyHighlights",
           "when": "activeCustomEditorId == pdfViewer.preview"
+        },
+        {
+          "command": "pdfViewer.pageTools",
+          "when": "activeCustomEditorId == pdfViewer.preview && config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.extractPages",
+          "when": "activeCustomEditorId == pdfViewer.preview && config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.deletePages",
+          "when": "activeCustomEditorId == pdfViewer.preview && config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.splitPdf",
+          "when": "activeCustomEditorId == pdfViewer.preview && config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.mergePdfs",
+          "when": "activeCustomEditorId == pdfViewer.preview && config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.exportAllHighlights",
+          "when": "config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.unlockWithSponsors",
+          "when": "config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.getPro",
+          "when": "config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.enterLicenseKey",
+          "when": "config.pdfViewer.showProFeatures"
+        },
+        {
+          "command": "pdfViewer.removeLicense",
+          "when": "config.pdfViewer.showProFeatures"
         }
       ]
     },
@@ -313,6 +408,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show the small Sponsor and More free viewers links at the bottom of the viewer. The change shows in files you open next. Nothing is sent anywhere."
+        },
+        "pdfViewer.showProFeatures": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Zovo Pro page tools (extract, delete, split, merge, highlights of all PDFs) and the Zovo Pro commands. Turn off to hide them. Everything free stays visible."
         }
       }
     },

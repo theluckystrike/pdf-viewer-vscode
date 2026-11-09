@@ -8,6 +8,8 @@ const { HighlightStore, highlightsToMarkdown } = require('./highlights');
 const { watchGlob, isSameFile } = require('./watch');
 const { createRatingPrompt } = require('./rate');
 const { registerSupport, commandUris, showLinks } = require('./support');
+const { createPro } = require('./pro');
+const { createPageTools } = require('./pageTools');
 
 let rating = { success() {}, failure() {} };
 
@@ -124,6 +126,7 @@ class PdfEditorProvider {
           sidebarOpen: this.sidebarDefault(cfg),
           fileName: path.basename(document.uri.path),
           highlights: this.highlights.get(key),
+          pro: this.proState(),
         });
         target = null; // a webview reload (hidden tab, window reload) keeps its own position
         load(false);
@@ -149,6 +152,12 @@ class PdfEditorProvider {
         this.highlights.set(key, m.items).then(() => this.syncHighlights(entry, key, m.items));
       } else if (m.type === 'copyHighlights') {
         this.copyHighlights(entry);
+      } else if (m.type === 'pageTools') {
+        if (this.tools) { this.active = entry; this.tools.menu(); }
+      } else if (m.type === 'exportAllHighlights') {
+        if (this.tools) this.tools.exportAllHighlights();
+      } else if (m.type === 'pageOpResult') {
+        if (this.tools) this.tools.onResult(entry, m);
       } else if (m.type === 'openExternal') {
         // Only after a user click on a link inside the PDF, and only http, https and mailto (checked in protocol.js).
         vscode.env.openExternal(vscode.Uri.parse(m.url, true));
@@ -180,11 +189,24 @@ class PdfEditorProvider {
     panel.onDidDispose(() => {
       panelDisposed = true;
       clearTimeout(timer);
+      if (this.tools) this.tools.onPanelClosed(entry);
       this.panels.delete(entry);
       if (this.active === entry) this.active = null;
       vscode.commands.executeCommand('setContext', 'pdfViewer.active', !!this.active);
       disposables.forEach((d) => d.dispose());
     });
+  }
+
+  /** What the webview shows of Zovo Pro: the Page tools button (show) and its PRO badge (badge). */
+  proState() {
+    const p = this.pro;
+    if (!p) return { show: false, badge: false };
+    return { show: p.shown(), badge: !p.isPro() };
+  }
+
+  postPro() {
+    const st = this.proState();
+    for (const e of this.panels) if (e.ready) e.panel.webview.postMessage({ type: 'pro', pro: st });
   }
 
   /** Whether a newly opened PDF shows the outline and pages sidebar (setting pdfViewer.sidebar). */
@@ -263,6 +285,23 @@ function activate(context) {
   rating = createRatingPrompt({ vscode, context, extensionId: 'zovo.pdf-viewer-dark', section: 'pdfViewer', name: 'PDF Viewer' });
   registerSupport({ vscode, context, prefix: 'pdfViewer', selfId: 'zovo.pdf-viewer-dark' });
   const provider = new PdfEditorProvider(context);
+  // Zovo Pro (src/pro.js): page tools, merge, highlights of all PDFs. Local checks only; no network on start.
+  const pro = createPro({ vscode, context });
+  provider.pro = pro;
+  provider.tools = createPageTools({ vscode, provider, pro });
+  pro.ready.then(() => provider.postPro(), () => {});
+  context.subscriptions.push(pro.onDidChange(() => provider.postPro()));
+  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((e) => { if (e.affectsConfiguration('pdfViewer.showProFeatures')) provider.postPro(); }));
+  if (vscode.window.registerUriHandler) context.subscriptions.push(vscode.window.registerUriHandler({ handleUri: (uri) => pro.license.handleUri(uri) }));
+  const toolCmds = {
+    'pdfViewer.pageTools': 'menu',
+    'pdfViewer.extractPages': 'extract',
+    'pdfViewer.deletePages': 'remove',
+    'pdfViewer.splitPdf': 'split',
+    'pdfViewer.mergePdfs': 'merge',
+    'pdfViewer.exportAllHighlights': 'exportAllHighlights',
+  };
+  for (const [id, fn] of Object.entries(toolCmds)) context.subscriptions.push(vscode.commands.registerCommand(id, () => provider.tools[fn]()));
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(VIEW_TYPE, provider, {
       webviewOptions: { retainContextWhenHidden: true },
@@ -295,7 +334,7 @@ function activate(context) {
     const target = uri instanceof vscode.Uri ? uri : (await vscode.window.showOpenDialog({ filters: { PDF: ['pdf'] }, canSelectMany: false }) || [])[0];
     if (target) await vscode.commands.executeCommand('vscode.openWith', target, VIEW_TYPE);
   }));
-  return { provider };
+  return { provider, pro };
 }
 
 function deactivate() {}

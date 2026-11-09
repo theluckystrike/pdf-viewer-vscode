@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.13 (2026-11-09)
+
+- "Rate it" in the rating question and the Rate link in the viewer footer now open the review page of the store your editor installs from: the Visual Studio Marketplace in VS Code, Open VSX in Cursor, Windsurf, VSCodium and other editors that use Open VSX. Before, they always opened the Marketplace.
+- A window that stays open for days now counts a file opened 4 hours or more after its first one as a new session for the rating question.
+- Nothing else changed: files open and look the same.
+
 ## 0.2.11 (2026-11-09)
 
 - The Marketplace name is now "PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)" (was "PDF Viewer & Reader to Read and View PDF in Dark Mode"). It brings back the exact words PDF Reader and keeps Read, View PDF and Dark Mode. The extension ID, settings and commands stay the same.

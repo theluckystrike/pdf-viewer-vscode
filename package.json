@@ -2,7 +2,7 @@
   "name": "pdf-viewer-dark",
   "displayName": "PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)",
   "description": "Free and offline. Sepia too, highlights to Markdown. PDF viewer and PDF reader for VS Code: dark or sepia pages that keep photos in their true colors, highlights you can copy as Markdown, search, outline, thumbnails and a reload on change that keeps your page.",
-  "version": "0.2.11",
+  "version": "0.2.13",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -307,7 +307,7 @@
         "pdfViewer.askForRating": {
           "type": "boolean",
           "default": true,
-          "description": "Ask for a Marketplace rating after 3 files opened without an error on 2 different days. \"Later\" asks one more time after 7 days, \"No thanks\" never asks again. It never asks after an error or more than 2 times. Nothing is sent anywhere."
+          "description": "Ask for a rating after 2 files opened without an error in 2 sessions at least 4 hours apart. \"Rate it\" opens the Marketplace review page in VS Code and the Open VSX one in Cursor, Windsurf and VSCodium. \"Later\" asks one more time after 7 days, \"No thanks\" never asks again. It never asks after an error or more than 2 times. Nothing is sent anywhere."
         },
         "pdfViewer.showSupportLinks": {
           "type": "boolean",

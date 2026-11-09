@@ -64,8 +64,10 @@ function createPageTools({ vscode, provider, pro, fileKey }) {
     return parsed.error ? null : parsed.segments;
   }
 
-  async function writeAndReport(target, bytes, what) {
+  // Writes the file, counts the free try at once (not after the message is closed), then reports.
+  async function writeAndReport(target, bytes, what, feature) {
     await vscode.workspace.fs.writeFile(target, bytes);
+    await pro.commit(feature);
     const pick = await say(what + ' Saved ' + nameOf(target) + '.', 'Open');
     if (pick === 'Open') await vscode.commands.executeCommand('vscode.openWith', target, 'pdfViewer.preview');
   }
@@ -86,8 +88,7 @@ function createPageTools({ vscode, provider, pro, fileKey }) {
     if (!target) return;
     const r = await runJob(entry, [P.extractPlan(segs)]);
     if (r.error || !r.results || !bytesOk(r.results[0])) return warn('Could not extract the pages: ' + (r.error || 'pdf.js returned no file.'));
-    await writeAndReport(target, r.results[0], P.countPages(segs) + ' page' + (P.countPages(segs) === 1 ? '' : 's') + ' extracted.');
-    await pro.commit('pages');
+    await writeAndReport(target, r.results[0], P.countPages(segs) + ' page' + (P.countPages(segs) === 1 ? '' : 's') + ' extracted.', 'pages');
     return target;
   }
 
@@ -114,8 +115,7 @@ function createPageTools({ vscode, provider, pro, fileKey }) {
     if (!target) return;
     const r = await runJob(entry, [d.plan]);
     if (r.error || !r.results || !bytesOk(r.results[0])) return warn('Could not delete the pages: ' + (r.error || 'pdf.js returned no file.'));
-    await writeAndReport(target, r.results[0], d.removed + ' page' + (d.removed === 1 ? '' : 's') + ' deleted, ' + left + ' left.');
-    await pro.commit('pages');
+    await writeAndReport(target, r.results[0], d.removed + ' page' + (d.removed === 1 ? '' : 's') + ' deleted, ' + left + ' left.', 'pages');
     return target;
   }
 
@@ -200,8 +200,7 @@ function createPageTools({ vscode, provider, pro, fileKey }) {
     const r = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Merging ' + (others.length + 1) + ' PDFs' }, () => runJob(entry, [mp.plan], extras));
     if (r.error || !r.results || !bytesOk(r.results[0])) return warn('Could not merge: ' + (r.error || 'pdf.js returned no file.'));
     const pages = entry.pages + (r.extraPages || []).reduce((a, b) => a + b, 0);
-    await writeAndReport(target, r.results[0], (others.length + 1) + ' PDFs merged, ' + pages + ' pages.');
-    await pro.commit('merge');
+    await writeAndReport(target, r.results[0], (others.length + 1) + ' PDFs merged, ' + pages + ' pages.', 'merge');
     return target;
   }
 

@@ -424,3 +424,17 @@ test('package.json: Pro commands hide with the setting, free commands do not', (
   for (const m of pal) if (!/Pro|License|Sponsors|getPro|pageTools|extractPages|deletePages|splitPdf|mergePdfs|exportAllHighlights/.test(m.command)) assert.doesNotMatch(m.when || '', /showProFeatures/, m.command);
   assert.equal(pkg.contributes.configuration.properties['pdfViewer.showProFeatures'].default, true);
 });
+
+test('host: the free try is counted when the file is written, even while the "Saved" message stays open', { skip }, async () => {
+  const t = await setup({ input: ['1'], save: ['default'] });
+  t.vscode.window.showInformationMessage = () => new Promise(() => {}); // the user never closes the toast
+  t.tools.extract();
+  const ok = await new Promise((resolve) => {
+    const t0 = Date.now();
+    const tick = () => (t.pro.left('pages') === 2 ? resolve(true) : Date.now() - t0 > 10000 ? resolve(false) : setTimeout(tick, 20));
+    tick();
+  });
+  assert.ok(ok, 'try counted before the toast closed');
+  assert.ok(t.log.written.has('/w/docs/report-p1.pdf'));
+  await t.doc.destroy();
+});

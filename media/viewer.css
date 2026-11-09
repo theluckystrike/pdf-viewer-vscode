@@ -31,6 +31,8 @@ button, input, select {
 }
 .sep { width: 1px; height: 18px; background: var(--vscode-editorGroup-border, rgba(128,128,128,.35)); margin: 0 4px; }
 .spacer { flex: 1 1 auto; }
+/* Buttons keep their size in a narrow editor; the search box and the file name give way first. */
+#toolbar > .tb, #toolbar > .sep, #toolbar > select, #toolbar > #pageInput { flex-shrink: 0; }
 .tb {
   min-width: 26px;
   height: 24px;
@@ -63,10 +65,10 @@ button, input, select {
   padding: 0 4px;
 }
 #zoomSelect { background: var(--vscode-dropdown-background); color: var(--vscode-dropdown-foreground); border-color: var(--vscode-dropdown-border, transparent); }
-#searchInput { width: 180px; }
+#searchInput { width: 180px; flex: 0 1 180px; min-width: 64px; }
 #searchInput.noResults { border-color: var(--vscode-inputValidation-errorBorder, #be1100); }
 #searchCount { min-width: 64px; opacity: .8; font-size: 12px; }
-#fileName { opacity: .7; overflow: hidden; text-overflow: ellipsis; max-width: 30%; }
+#fileName { opacity: .7; overflow: hidden; text-overflow: ellipsis; max-width: 30%; min-width: 0; flex-shrink: 1; }
 #status { opacity: .8; font-size: 12px; }
 #main { flex: 1 1 auto; display: flex; min-height: 0; }
 #sidebar {

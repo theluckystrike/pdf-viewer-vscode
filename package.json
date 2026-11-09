@@ -1,8 +1,8 @@
 {
   "name": "pdf-viewer-dark",
-  "displayName": "PDF Viewer & Reader to Read and View PDF in Dark Mode",
+  "displayName": "PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)",
   "description": "Free and offline. Sepia too, highlights to Markdown. PDF viewer and PDF reader for VS Code: dark or sepia pages that keep photos in their true colors, highlights you can copy as Markdown, search, outline, thumbnails and a reload on change that keeps your page.",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",

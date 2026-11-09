@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.11 (2026-11-09)
+
+- The Marketplace name is now "PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)" (was "PDF Viewer & Reader to Read and View PDF in Dark Mode"). It brings back the exact words PDF Reader and keeps Read, View PDF and Dark Mode. The extension ID, settings and commands stay the same.
+- No change to how files open or look.
+
 ## 0.2.10 (2026-11-08)
 
 - The Marketplace name is now "PDF Viewer & Reader to Read and View PDF in Dark Mode" (was "PDF Viewer & PDF Reader"), so more searches find it. The extension ID, settings and commands stay the same.

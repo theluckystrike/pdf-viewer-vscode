@@ -1,9 +1,11 @@
 # Changelog
 
-## 0.2.13 (2026-11-09)
+## 0.2.14 (2026-11-09)
 
 - "Rate it" in the rating question and the Rate link in the viewer footer now open the review page of the store your editor installs from: the Visual Studio Marketplace in VS Code, Open VSX in Cursor, Windsurf, VSCodium and other editors that use Open VSX. Before, they always opened the Marketplace.
 - A window that stays open for days now counts a file opened 4 hours or more after its first one as a new session for the rating question.
+- PayPal is now in the footer links and in the README "Support Zovo" section, next to GitHub Sponsors. Both are optional; the viewer works the same without them.
+- README: a short "Free and Zovo Pro" note. This viewer stays free and complete; nothing in it becomes paid.
 - Nothing else changed: files open and look the same.
 
 ## 0.2.11 (2026-11-09)

@@ -124,6 +124,12 @@ The viewer leaves other VS Code keys alone. `Ctrl+P` opens Quick Open and `Ctrl+
 
 *Real output, light and dark. The extension's own webview code and its bundled pdf.js render [`test/fixtures/earthquakes-october-2026.pdf`](https://github.com/theluckystrike/pdf-viewer-vscode/blob/main/test/fixtures/earthquakes-october-2026.pdf), a 3 page report built from the real USGS earthquake catalog for October 2026. [`scripts/readme-shots`](https://github.com/theluckystrike/pdf-viewer-vscode/tree/main/scripts/readme-shots) has the scripts that build the PDF and capture the shots in headless Chrome.*
 
+## Free and Zovo Pro
+
+This viewer is free and complete. Nothing in it is paid, and every feature it has today stays free.
+
+Zovo Pro is optional: USD 19, paid once, for every Zovo VS Code viewer. Today it adds Pro features in [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) (binary templates with a structure view, bookmarks, checksums and compare reports) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) (redline export as a Word file with tracked changes, and folder compare). Pro features that come to other Zovo viewers later are included, this one too if it gets any. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
+
 ## Privacy and security
 
 The extension reads the PDF with the VS Code file system API and hands the bytes to the viewer. It doesn't upload anything, and it has no telemetry. The viewer runs under a strict Content-Security-Policy that allows only the extension's own scripts. Titles, text and links from the PDF are always inserted as plain text. PDF JavaScript and forms scripting are not run.
@@ -150,14 +156,15 @@ PDF rendering by [pdf.js](https://github.com/mozilla/pdf.js) from Mozilla (Apach
 Zovo extensions are free, with no ads and no tracking. They are made by [theluckystrike](https://github.com/theluckystrike) on GitHub. If this one saves you time, you can support the work:
 
 - [Sponsor on GitHub](https://github.com/sponsors/theluckystrike)
+- [PayPal](https://www.paypal.com/paypalme/najzzz)
 - [Follow theluckystrike on GitHub](https://github.com/theluckystrike)
 
 ## More tools by Zovo
 
-- [DOCX Viewer, Word Viewer & DOCX Preview (Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) previews Word and ODT files with dark mode, an outline and search.
-- [PPTX Viewer & PowerPoint Viewer, PPT Slide Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer) shows PowerPoint slides, thumbnails and speaker notes.
+- [Office Viewer Pack](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-file-viewers): adds the other three Office viewers in one install.
+- [DOCX Viewer & ODT Viewer, Word Document Preview (Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) previews Word and ODT files with dark mode, an outline and search.
+- [PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow](https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer) shows PowerPoint slides, thumbnails and speaker notes.
 - [EPUB Viewer, EPUB Reader & Ebook Reader](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-epub-reader) reads EPUB books with a table of contents, search and light, sepia or dark themes.
-- [XLSX Viewer, Excel Viewer, CSV Viewer & Parquet Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.table-viewer-vscode) opens CSV, TSV, Excel and Parquet files as a sortable, filterable table.
-- [EML Viewer, Email Headers & MBOX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.eml-viewer) reads EML, EMLX and MBOX email files with remote images blocked.
+- [XLSX Viewer & CSV Preview for Excel, XLS & Parquet](https://marketplace.visualstudio.com/items?itemName=zovo.table-viewer-vscode) opens CSV, TSV, Excel and Parquet files as a sortable, filterable table.
 
 See [all Zovo extensions on the Marketplace](https://marketplace.visualstudio.com/publishers/zovo).

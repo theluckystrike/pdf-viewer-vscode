@@ -48,7 +48,9 @@ test('html: strict CSP, nonce on scripts, no remote or eval sources', () => {
   const uris = { core: 'https://r/core.js', viewer: 'https://r/viewer.js', css: 'https://r/v.css', pdfjs: 'https://r/pdf.min.mjs', worker: 'https://r/w.mjs', cmaps: 'https://r/c/', fonts: 'https://r/f/', wasm: 'https://r/w/' };
   // The footer's Rate link is a click-only link to the Marketplace review page, not a loaded resource.
   const rateLink = / href=\"https:\/\/marketplace\.visualstudio\.com\/items\?itemName=[^\"]+#review-details\"/g;
-  const html = buildHtml(uris, 'https://r', 'NONCE1').replace(rateLink, '');
+  // The PayPal footer link (funding.json, EXEC4 0.2.12) is click-only too.
+  const paypalLink = / href=\"https:\/\/www\.paypal\.com\/paypalme\/[^\"]+\"/g;
+  const html = buildHtml(uris, 'https://r', 'NONCE1').replace(rateLink, '').replace(paypalLink, '');
   const csp = /content="([^"]+)"/.exec(html)[1];
   assert.match(csp, /default-src 'none'/);
   assert.match(csp, /script-src 'nonce-NONCE1' https:\/\/r 'wasm-unsafe-eval'/);
@@ -493,11 +495,13 @@ test('support: Sponsor opens GitHub Sponsors, More free viewers opens the picked
   const ran = [];
   fake.vscode.commands.executeCommand = async (...a) => { ran.push(a); };
   fake.vscode.extensions = { getExtension: () => undefined };
-  let pickFn = async () => undefined;
+  // With PayPal set (EXEC4 0.2.12), Support shows Sponsor and PayPal; pick Sponsor.
+  let pickFn = async (items) => items.find((i) => i.link && i.link.url === 'https://github.com/sponsors/theluckystrike');
   fake.vscode.window.showQuickPick = (items) => pickFn(items);
   const ext = loadExtension(fake);
   ext.activate(context());
   await fake.commands.get('pdfViewer.supportDeveloper')();
+  pickFn = async () => undefined;
   assert.deepEqual(fake.opened, ['https://github.com/sponsors/theluckystrike']);
   await fake.commands.get('pdfViewer.moreViewers')(); // closed without a pick: nothing happens
   assert.equal(ran.filter((a) => a[0] === 'workbench.extensions.installExtension').length, 0);

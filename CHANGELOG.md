@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.12 (2026-11-09)
+
+- PayPal is now in the footer links and in the README "Support Zovo" section, next to GitHub Sponsors. Both are optional; the viewer works the same without them.
+- README: a short "Free and Zovo Pro" note. This viewer stays free and complete; nothing in it becomes paid.
+- No change to how files open or look.
+
 ## 0.2.11 (2026-11-09)
 
 - The Marketplace name is now "PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)" (was "PDF Viewer & Reader to Read and View PDF in Dark Mode"). It brings back the exact words PDF Reader and keeps Read, View PDF and Dark Mode. The extension ID, settings and commands stay the same.

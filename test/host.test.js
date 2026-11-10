@@ -464,8 +464,8 @@ test('manifest and README: links point at the public repo, images use absolute r
 test('support: package.json has the sponsor field, the two commands and the setting', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   const support = require('../src/support');
-  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike');
-  assert.equal(pkg.sponsor.url, support.sponsorUrl());
+  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878');
+  assert.equal(pkg.sponsor.url, 'https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878');
   const ids = pkg.contributes.commands.map((c) => c.command);
   assert.ok(ids.includes('pdfViewer.supportDeveloper') && ids.includes('pdfViewer.moreViewers'));
   assert.equal(pkg.contributes.configuration.properties['pdfViewer.showSupportLinks'].default, true);
@@ -484,8 +484,8 @@ test('support: the footer shows by default and pdfViewer.showSupportLinks=false 
     await reg.p.resolveCustomEditor(reg.p.openCustomDocument(fake.vscode.Uri.file('/a.pdf')), fp.panel);
     const html = fp.panel.webview.html;
     assert.equal(/id="zovo-support"/.test(html), shown, JSON.stringify(settings));
-    assert.equal(html.includes('command:pdfViewer.supportDeveloper'), shown);
-    assert.deepEqual(fp.panel.webview.options.enableCommandUris, ['pdfViewer.supportDeveloper', 'pdfViewer.moreViewers', 'workbench.action.openSettings']);
+    assert.equal(html.includes('command:pdfViewer.getPro'), shown);
+    assert.deepEqual(fp.panel.webview.options.enableCommandUris, ['pdfViewer.supportDeveloper', 'pdfViewer.moreViewers', 'pdfViewer.getPro', 'pdfViewer.payWithPayPal', 'workbench.action.openSettings']);
     assert.ok(fake.commands.has('pdfViewer.supportDeveloper') && fake.commands.has('pdfViewer.moreViewers'));
   }
 });

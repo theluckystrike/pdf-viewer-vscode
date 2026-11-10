@@ -27,21 +27,22 @@ const FEATURES = {
   }
 };
 
-// The shared module adds the "How to buy" paragraph (GitHub Sponsors tier, PayPal USD 19 / team USD 59) after this.
+// EXEC14: the shared module (buy path v2) writes the price, the other Pro tools, the count of Zovo extensions and
+// "Everything that is free today stays free." under the feature text, then [Get Zovo Pro, USD 19] [Pay with PayPal]
+// [I already paid]. PRICE_LINE stays exported for older tests and the README check.
 const PRICE_LINE = 'Zovo Pro is USD 19 once, for life, and unlocks the Pro features in every Zovo viewer.';
-const FREE_LINE = 'Everything else in PDF Viewer stays free: reading, dark and sepia pages, search, outline, thumbnails, highlights, Copy Highlights as Markdown and page links.';
+const TOOL_NAMES = Object.values(FEATURES).map((f) => f.title);
 
 function createPro({ vscode, context, license, enabled }) {
   const on = enabled === undefined ? PRO_ENABLED : enabled;
-  const lic = license || createLicense({ vscode, context, sku: SKU, name: 'Zovo', product: 'PDF Viewer', commandPrefix: 'pdfViewer' });
+  const lic = license || createLicense({ vscode, context, sku: SKU, name: 'Zovo', product: 'PDF Viewer', proTools: TOOL_NAMES, commandPrefix: 'pdfViewer' });
   const used = (f) => Number((context.globalState.get(TRIAL_KEY) || {})[f]) || 0;
   const left = (f) => (FEATURES[f] ? Math.max(0, TRIAL_USES - used(f)) : 0);
   const pro = () => !on || lic.isPro(SKU);
 
   async function explain(f) {
     const ft = FEATURES[f];
-    const tried = used(f) >= TRIAL_USES ? 'You have used the ' + TRIAL_USES + ' free tries of this feature on this computer.\n\n' : '';
-    return lic.requirePro(ft.title, tried + ft.detail + '\n\n' + PRICE_LINE + '\n\n' + FREE_LINE);
+    return lic.requirePro(ft.title, { detail: ft.detail, triesUsed: used(f) >= TRIAL_USES ? TRIAL_USES : 0 });
   }
 
   // Call when the user has chosen a Pro action, before asking for its inputs. True when it may run: Pro, or free

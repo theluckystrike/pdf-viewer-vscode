@@ -3,7 +3,7 @@
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/i/zovo.pdf-viewer-dark?label=VS%20Code%20installs" alt="VS Code installs"></a>
 <a href="https://marketplace.visualstudio.com/items?itemName=zovo.pdf-viewer-dark"><img src="https://img.shields.io/visual-studio-marketplace/v/zovo.pdf-viewer-dark?label=version" alt="Version"></a>
 
-A PDF viewer and PDF reader for VS Code. Read specs and papers next to your code on dark or sepia pages that keep photos in their real colors, and highlight the parts you want to find again.
+A PDF viewer and PDF reader for VS Code. Read specs and papers next to your code on dark or sepia pages that keep photos in their real colors, and highlight the parts you want to find again. Reading stays free. Optional Zovo Pro (USD 19 once, for all Zovo extensions) adds page tools that save a new PDF (extract, delete, reorder, split), merging PDFs, and the highlights of all your PDFs in one Markdown file; each works 3 times for free.
 
 It reloads when the PDF changes on disk, after a LaTeX, Typst or report build, and keeps your page, zoom and scroll position. It does not take `Ctrl+P` (`Cmd+P` on macOS), so Quick Open works while a PDF is open. Its find, go-to-page and zoom keys apply only while the PDF tab is active.
 
@@ -12,7 +12,6 @@ It reloads when the PDF changes on disk, after a LaTeX, Typst or report build, a
 - Highlights: select text and pick one of 4 colors, or press `H`. The Highlights tab lists them, a click jumps back, and "Copy as Markdown" gives you a list with a link to each page for your notes. The PDF file is not changed.
 - Dark and sepia pages: dark pages for night, warm sepia pages for long reading. Text, lines and backgrounds change color. Photos keep theirs.
 - Find, outline and pages: Find in PDF highlights every match, and the sidebar has the outline and page thumbnails. Each PDF reopens where you left it. It runs offline, with no telemetry.
-- Optional Zovo Pro (USD 19 once, for every Zovo viewer): page tools that save a new PDF (extract, delete, reorder, split), merge PDFs, and the highlights of all your PDFs in one Markdown file. Each one works 3 times for free. Everything above stays free.
 
 ## Quick start
 
@@ -142,7 +141,7 @@ The new PDF is written by the same pdf.js that shows the page, on your computer.
 
 Everything you could do before stays free: reading, dark and sepia pages, search, the outline and thumbnails, highlights, Copy as Markdown and page links.
 
-Zovo Pro adds the page tools, merge and the all-highlights export above. Each one works 3 times on your computer before it asks. Zovo Pro is USD 19 once on GitHub Sponsors (the ["$19 one time" tier](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878)) and unlocks the Pro features in every Zovo VS Code viewer, including [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode). If you bought that tier, or have a monthly sponsorship of USD 10 or more that is still running, run "Zovo: Unlock Pro with GitHub Sponsors". The "$15 one time" and "$5 a month" tiers on the same page are for Obsidian plugins and do not include Zovo Pro. No GitHub account? Choose "Pay with PayPal" in the Pro message (or run "Zovo: Pay for Pro with PayPal"): USD 19, or USD 59 for a team of 5, at [paypal.com/paypalme/najzzz/19](https://www.paypal.com/paypalme/najzzz/19). Send the transaction ID with the short form it opens, and the license key comes by email; run "Zovo: Enter License Key". No popups on open, no ads, no countdown. Set `pdfViewer.showProFeatures` to `false` to hide the Pro button and commands. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
+Zovo Pro adds the page tools, merge and the all-highlights export above. Each one works 3 times on your computer before it asks. Zovo Pro is USD 19 once on GitHub Sponsors (the ["$19 one time" tier](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878)) and unlocks the Pro features in every Zovo VS Code viewer, including [Hex Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-hex-viewer) and [DOCX Viewer](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode). If you bought that tier, or have a monthly sponsorship of USD 10 or more that is still running, run "Zovo Pro: I already paid: unlock with GitHub Sponsors". The "$15 one time" and "$5 a month" tiers on the same page are for Obsidian plugins and do not include Zovo Pro. No GitHub account? Choose "Pay with PayPal" in the Pro message (or run "Zovo Pro: Pay for Zovo Pro with PayPal"): USD 19, or USD 59 for a team of 5, at [paypal.com/paypalme/najzzz/19](https://www.paypal.com/paypalme/najzzz/19). Send the transaction ID with the short form it opens, and the license key comes by email; run "Zovo Pro: Enter Zovo Pro license key". Turn Pro on once: the other Zovo extensions on the same computer read it from `~/.zovo/pro.json` and are Pro too, with no second sign-in or paste. No popups on open, no ads, no countdown. Set `pdfViewer.showProFeatures` to `false` to hide the Pro button and commands. See [what Zovo Pro includes](https://theluckystrike.github.io/zovo-plugin-factory/pro.html).
 
 ## Privacy and security
 
@@ -150,7 +149,7 @@ The extension reads the PDF with the VS Code file system API and hands the bytes
 
 A link inside a PDF opens in your browser only when you click it, and only for `http`, `https` and `mailto` links.
 
-Zovo Pro checks run on your computer. The only network call is the one you start with "Unlock with GitHub Sponsors": VS Code's GitHub sign-in and one question to GitHub about your sponsorship. A license key is checked offline.
+Zovo Pro checks run on your computer. The only network call is the one you start with "Unlock with GitHub Sponsors": VS Code's GitHub sign-in and one question to GitHub about your sponsorship. A license key is checked offline. After an unlock, the key or the Sponsors result (GitHub login, tier and date, never a token) is saved in `~/.zovo/pro.json` (readable only by you) so your other Zovo extensions can use it.
 
 ## Known limits
 
@@ -169,11 +168,17 @@ PDF rendering by [pdf.js](https://github.com/mozilla/pdf.js) from Mozilla (Apach
 
 ## Support Zovo
 
-Zovo extensions are free, with no ads and no tracking. They are made by [theluckystrike](https://github.com/theluckystrike) on GitHub. If this one saves you time, you can support the work:
+Zovo Pro: USD 19 once, every Zovo viewer. [Get Zovo Pro on GitHub Sponsors](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878) to turn on the Pro tools in this extension and in the other Zovo extensions you use. The free features stay free.
+
+Zovo extensions have no ads and no tracking. They are made by [theluckystrike](https://github.com/theluckystrike) on GitHub. You can also support the work with no Pro:
 
 - [Sponsor on GitHub](https://github.com/sponsors/theluckystrike)
 - [PayPal](https://www.paypal.com/paypalme/najzzz)
 - [Follow theluckystrike on GitHub](https://github.com/theluckystrike)
+
+### Need your format supported?
+
+Open a [format request](https://github.com/theluckystrike/pdf-viewer-vscode/issues/new?template=format-request.yml) with a sample file, and I reply there whether it can be done. For USD 299 once, through [this GitHub Sponsors tier](https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679995), I add your file format or a missing feature to this extension, with tests, within 7 days.
 
 ## More tools by Zovo
 
@@ -181,6 +186,6 @@ Zovo extensions are free, with no ads and no tracking. They are made by [theluck
 - [DOCX Viewer & ODT Viewer, Word Document Preview (Dark Mode)](https://marketplace.visualstudio.com/items?itemName=zovo.docx-viewer-vscode) previews Word and ODT files with dark mode, an outline and search.
 - [PPTX Viewer & PowerPoint Preview, PPT Presentation Slideshow](https://marketplace.visualstudio.com/items?itemName=zovo.pptx-slide-viewer) shows PowerPoint slides, thumbnails and speaker notes.
 - [EPUB Viewer, EPUB Reader & Ebook Reader](https://marketplace.visualstudio.com/items?itemName=zovo.zovo-epub-reader) reads EPUB books with a table of contents, search and light, sepia or dark themes.
-- [XLSX Viewer & CSV Preview for Excel, XLS & Parquet](https://marketplace.visualstudio.com/items?itemName=zovo.table-viewer-vscode) opens CSV, TSV, Excel and Parquet files as a sortable, filterable table.
+- [XLSX Viewer, Excel Viewer, CSV Viewer & Parquet Viewer (XLS, CSV Preview)](https://marketplace.visualstudio.com/items?itemName=zovo.table-viewer-vscode) opens CSV, TSV, Excel and Parquet files as a sortable, filterable table.
 
 See [all Zovo extensions on the Marketplace](https://marketplace.visualstudio.com/publishers/zovo).

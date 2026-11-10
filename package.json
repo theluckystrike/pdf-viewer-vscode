@@ -2,7 +2,7 @@
   "name": "pdf-viewer-dark",
   "displayName": "PDF Viewer & PDF Reader to Read and View PDF (Dark Mode)",
   "description": "Free and offline. Sepia too, highlights to Markdown. PDF viewer and PDF reader for VS Code: dark or sepia pages that keep photos in their true colors, highlights you can copy as Markdown, search, outline, thumbnails and a reload on change that keeps your page.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "zovo",
   "license": "MIT",
   "icon": "icon.png",
@@ -190,28 +190,28 @@
       },
       {
         "command": "pdfViewer.unlockWithSponsors",
-        "title": "Zovo: Unlock Pro with GitHub Sponsors",
-        "category": "PDF"
+        "title": "I already paid: unlock with GitHub Sponsors",
+        "category": "Zovo Pro"
       },
       {
         "command": "pdfViewer.getPro",
-        "title": "Zovo: Get Pro (USD 19 once, all Zovo viewers)",
-        "category": "PDF"
+        "title": "Get Zovo Pro (USD 19 once, all 22 Zovo extensions)",
+        "category": "Zovo Pro"
       },
       {
         "command": "pdfViewer.payWithPayPal",
-        "title": "Zovo: Pay for Pro with PayPal (USD 19, key by email)",
-        "category": "PDF"
+        "title": "Pay for Zovo Pro with PayPal (USD 19, team of 5 USD 59)",
+        "category": "Zovo Pro"
       },
       {
         "command": "pdfViewer.enterLicenseKey",
-        "title": "Zovo: Enter License Key",
-        "category": "PDF"
+        "title": "Enter Zovo Pro license key",
+        "category": "Zovo Pro"
       },
       {
         "command": "pdfViewer.removeLicense",
-        "title": "Zovo: Remove License from This Editor",
-        "category": "PDF"
+        "title": "Remove Zovo Pro from this editor",
+        "category": "Zovo Pro"
       }
     ],
     "menus": {
@@ -465,6 +465,14 @@
             "completionEvents": [
               "onCommand:workbench.action.openSettings"
             ]
+          },
+          {
+            "id": "zovo-related",
+            "title": "Files that often come with PDF files",
+            "description": "If your project also has Word documents or spreadsheets and CSV files, these free Zovo extensions open them. A link opens the extension page, and you choose there whether to install it.\n[Office Viewer Pack](command:extension.open?%5B%22zovo.zovo-file-viewers%22%5D)\n[DOCX Viewer](command:extension.open?%5B%22zovo.docx-viewer-vscode%22%5D)\n[XLSX and CSV Viewer](command:extension.open?%5B%22zovo.table-viewer-vscode%22%5D)",
+            "media": {
+              "markdown": "walkthrough/related.md"
+            }
           }
         ]
       }
@@ -514,6 +522,6 @@
     "url": "https://github.com/theluckystrike/pdf-viewer-vscode.git"
   },
   "sponsor": {
-    "url": "https://github.com/sponsors/theluckystrike"
+    "url": "https://github.com/sponsors/theluckystrike/sponsorships?tier_id=679878"
   }
 }

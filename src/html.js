@@ -77,7 +77,7 @@ ${footer ? `<style nonce="${N}">${FOOTER_CSS}</style>` : ''}
   <span class="spacer"></span>
   <span id="status" aria-live="polite"></span>
   <span id="fileName"></span>
-  <button class="tb" id="toolsBtn" hidden title="Page tools: extract, delete, split and merge pages, export all highlights (Zovo Pro)" aria-label="Page tools"><svg viewBox="0 0 16 16"><path d="M4 1h6l3 3v8H4V1zm1 1v9h7V5H9V2H5zM2 4h1v10h8v1H2V4z"/></svg><span class="proBadge" id="toolsBadge">PRO</span></button>
+  <button class="tb" id="toolsBtn" hidden title="Page tools: extract, delete, split and merge pages, export all highlights (Zovo Pro)" aria-label="Page tools"><svg viewBox="0 0 16 16"><path d="M4 1h6l3 3v8H4V1zm1 1v9h7V5H9V2H5zM2 4h1v10h8v1H2V4z"/></svg><span class="tbLabel">Page tools</span><span class="proBadge" id="toolsBadge">PRO</span></button>
   <button class="tb" id="sepiaBtn" title="Sepia pages: off (click for warm paper colors)" aria-pressed="false" aria-label="Sepia pages"><svg viewBox="0 0 16 16"><path d="M3 1.5h7l3 3v10H3v-13zm1 1v11h8V5h-2.5V2.5H4zm1.5 4h5v1h-5v-1zm0 2h5v1h-5v-1zm0 2h3.5v1H5.5v-1z"/></svg></button>
   <button class="tb" id="darkBtn" title="Dark pages" aria-pressed="false" aria-label="Dark pages"><svg viewBox="0 0 16 16"><path d="M6 1.5a6.5 6.5 0 1 0 8.5 8.5A5.5 5.5 0 0 1 6 1.5z"/></svg></button>
 </div>

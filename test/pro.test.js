@@ -274,9 +274,16 @@ test('host: after 3 tries the next use explains Pro once (modal) and runs nothin
   await t.tools.remove();
   assert.equal(t.lic.calls.requirePro.length, 1);
   assert.equal(t.lic.calls.requirePro[0].f, 'Page tools');
-  assert.match(t.lic.calls.requirePro[0].detail, /used the 3 free tries/);
-  assert.match(t.lic.calls.requirePro[0].detail, /USD 19 once/);
-  assert.match(t.lic.calls.requirePro[0].detail, /stays free/);
+  // EXEC14: structured panel text; the shared module writes the price, the other tools and "stays free".
+  assert.equal(t.lic.calls.requirePro[0].detail.triesUsed, 3);
+  assert.match(t.lic.calls.requirePro[0].detail.detail, /^Saves the pages you pick as a new PDF/);
+  const { createLicense } = require('../src/license');
+  const real = createLicense({ vscode: { window: {}, commands: { registerCommand: () => ({ dispose() {} }) } }, context: { subscriptions: [], secrets: { get: async () => undefined, onDidChange: () => ({ dispose() {} }) }, globalState: { get: () => undefined, update: async () => {} } }, sku: 'pdf-pro', name: 'Zovo', product: 'PDF Viewer', proTools: Object.values(require('../src/pro').FEATURES).map((x) => x.title) });
+  const text = real.panelDetail('Page tools', t.lic.calls.requirePro[0].detail);
+  assert.match(text, /^You used the 3 free tries on this computer\.\nSaves the pages/);
+  assert.match(text, /Zovo Pro is USD 19 once, for life\. It turns on Merge PDFs and Highlights of all PDFs here, and the Pro tools of all 22 Zovo extensions/);
+  assert.match(text, /Everything that is free today stays free\.$/);
+  assert.doesNotMatch(text, /refund/i);
   assert.equal(t.log.inputs.length, before, 'no input box after the modal was cancelled');
   // Another Pro tool still has its own 3 tries.
   assert.equal(t.pro.left('merge'), 3);

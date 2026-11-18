@@ -11,6 +11,13 @@ A PDF viewer and PDF reader for VS Code. Read specs and papers next to your code
 - Dark and sepia pages: dark pages for night, warm sepia pages for long reading. Text, lines and backgrounds change color. Photos keep theirs.
 - Find, outline and pages: Find in PDF highlights every match, and the sidebar has the outline and page thumbnails. Each PDF reopens where you left it. It runs offline, with no telemetry.
 
+## Teams and companies
+
+- Zovo Pro Team is the company licence: USD 59 once for a team of 5, one key, the Pro tools in every Zovo extension that has them. [See Zovo Pro Team](https://license.zovo.one/buy/zovo-pro-team?client_reference_id=readme-pdf)
+- Commercial use is allowed.
+- The key is checked on your computer, so it works offline. No account and no subscription.
+- Invoice with your company name and tax ID on request: support@zovo.one.
+
 ## Quick start
 
 1. Install the extension.
